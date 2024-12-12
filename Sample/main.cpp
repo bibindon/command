@@ -15,7 +15,7 @@
 #include <d3dx9.h>
 #include <string>
 
-using namespace NSHud;
+using namespace NSCommand;
 
 #define SAFE_RELEASE(p) { if (p) { (p)->Release(); (p) = NULL; } }
 
@@ -168,7 +168,7 @@ D3DXMATERIAL* d3dxMaterials = NULL;
 float f = 0.0f;
 bool bShowMenu = true;
 
-hud menu;
+CommandLib menu;
 
 void TextDraw(LPD3DXFONT pFont, char* text, int X, int Y)
 {

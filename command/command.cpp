@@ -2,7 +2,7 @@
 #include <sstream>
 #include <algorithm>
 
-using namespace NSHud;
+using namespace NSCommand;
 
 static std::vector<std::string> split(const std::string& s, char delim)
 {
@@ -18,14 +18,14 @@ static std::vector<std::string> split(const std::string& s, char delim)
     return result;
 }
 
-void hud::Init(IFont* font, ISoundEffect* pSE, ISprite* sprCursor)
+void CommandLib::Init(IFont* font, ISoundEffect* pSE, ISprite* sprCursor)
 {
     m_font = font;
     m_SE = pSE;
     m_sprCursor = sprCursor;
 }
 
-void NSHud::hud::UpsertCommand(const std::string& name, const bool enable)
+void NSCommand::CommandLib::UpsertCommand(const std::string& name, const bool enable)
 {
     auto result = std::find_if(m_commandList.begin(), m_commandList.end(),
                                [&](const Command& x)
@@ -49,7 +49,7 @@ void NSHud::hud::UpsertCommand(const std::string& name, const bool enable)
     ResetRect();
 }
 
-void NSHud::hud::RemoveCommand(const std::string& name)
+void NSCommand::CommandLib::RemoveCommand(const std::string& name)
 {
     auto result = std::remove_if(m_commandList.begin(), m_commandList.end(),
                                  [&](const Command& x)
@@ -62,7 +62,7 @@ void NSHud::hud::RemoveCommand(const std::string& name)
     ResetRect();
 }
 
-void hud::Draw()
+void CommandLib::Draw()
 {
     // コマンドを中央揃えで表示する
     for (int i = 0; i < (int)m_commandList.size(); ++i)
@@ -109,7 +109,7 @@ void hud::Draw()
     }
 }
 
-void NSHud::hud::Previous()
+void NSCommand::CommandLib::Previous()
 {
     auto it = std::find_if(m_commandList.begin(), m_commandList.end(),
                            [](const Command& x)
@@ -141,7 +141,7 @@ void NSHud::hud::Previous()
     m_SE->PlayMove();
 }
 
-void NSHud::hud::Next()
+void NSCommand::CommandLib::Next()
 {
     auto it = std::find_if(m_commandList.begin(), m_commandList.end(),
                            [](const Command& x)
@@ -173,13 +173,13 @@ void NSHud::hud::Next()
     m_SE->PlayMove();
 }
 
-std::string NSHud::hud::Into()
+std::string NSCommand::CommandLib::Into()
 {
     m_SE->PlayClick();
     return m_commandList.at(m_cursorIndex).GetName();
 }
 
-void NSHud::hud::MouseMove(const int x, const int y)
+void NSCommand::CommandLib::MouseMove(const int x, const int y)
 {
     int index = -1;
     for (int i = 0; i < (int)m_commandList.size(); ++i)
@@ -209,7 +209,7 @@ void NSHud::hud::MouseMove(const int x, const int y)
     }
 }
 
-std::string NSHud::hud::Click(const int x, const int y)
+std::string NSCommand::CommandLib::Click(const int x, const int y)
 {
     int index = -1;
     for (int i = 0; i < (int)m_commandList.size(); ++i)
@@ -249,7 +249,7 @@ std::string NSHud::hud::Click(const int x, const int y)
     }
 }
 
-void NSHud::hud::ResetRect()
+void NSCommand::CommandLib::ResetRect()
 {
     // 奇数の場合
     if (m_commandList.size() % 2 == 1)
@@ -294,27 +294,27 @@ void NSHud::hud::ResetRect()
     }
 }
 
-void NSHud::Command::SetName(const std::string& arg)
+void NSCommand::Command::SetName(const std::string& arg)
 {
     m_name = arg;
 }
 
-std::string NSHud::Command::GetName() const
+std::string NSCommand::Command::GetName() const
 {
     return m_name;
 }
 
-void NSHud::Command::SetEnable(const bool arg)
+void NSCommand::Command::SetEnable(const bool arg)
 {
     m_bEnable = arg;
 }
 
-bool NSHud::Command::GetEnable() const
+bool NSCommand::Command::GetEnable() const
 {
     return m_bEnable;
 }
 
-void NSHud::Command::SetRect(const int top, const int left, const int bottom, const int right)
+void NSCommand::Command::SetRect(const int top, const int left, const int bottom, const int right)
 {
     m_top = top;
     m_left = left;
@@ -322,7 +322,7 @@ void NSHud::Command::SetRect(const int top, const int left, const int bottom, co
     m_right = right;
 }
 
-void NSHud::Command::GetRect(int* top, int* left, int* bottom, int* right)
+void NSCommand::Command::GetRect(int* top, int* left, int* bottom, int* right)
 {
     *top = m_top;
     *left = m_left;
@@ -330,7 +330,7 @@ void NSHud::Command::GetRect(int* top, int* left, int* bottom, int* right)
     *right = m_right;
 }
 
-int NSHud::Command::GetLeftPos()
+int NSCommand::Command::GetLeftPos()
 {
     return m_left;
 }
