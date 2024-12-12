@@ -119,8 +119,8 @@ public:
                            const int y,
                            const int transparent)
     {
-        RECT rect = { x, y, 0, 0 };
-        m_pFont->DrawText(NULL, msg.c_str(), -1, &rect, DT_LEFT | DT_NOCLIP,
+        RECT rect = { x, y, x + 100, 0 };
+        m_pFont->DrawText(NULL, msg.c_str(), -1, &rect, DT_CENTER | DT_NOCLIP,
             D3DCOLOR_ARGB(transparent, 255, 255, 255));
     }
 
@@ -144,7 +144,6 @@ class SoundEffect : public ISoundEffect
     virtual void PlayClick() override
     {
         PlaySound("cursor_confirm.wav", NULL, SND_FILENAME | SND_ASYNC);
-        //        PlaySound("cursor_move.wav", NULL, SND_FILENAME | SND_ASYNC);
     }
     virtual void PlayBack() override
     {
@@ -389,6 +388,18 @@ LRESULT WINAPI MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         }
         break;
+    case WM_MOUSEMOVE:
+    {
+        POINTS mouse_p = MAKEPOINTS(lParam);
+        menu.MouseMove(mouse_p.x, mouse_p.y);
+        break;
+    }
+    case WM_LBUTTONDOWN:
+    {
+        POINTS mouse_p = MAKEPOINTS(lParam);
+        menu.Click(mouse_p.x, mouse_p.y);
+        break;
+    }
     }
 
     return DefWindowProc(hWnd, msg, wParam, lParam);

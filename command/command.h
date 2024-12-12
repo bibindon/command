@@ -55,9 +55,18 @@ public:
     void SetEnable(const bool arg);
     bool GetEnable() const;
 
+    void SetRect(const int top, const int left, const int bottom, const int right);
+    void GetRect(int* top, int* left, int* bottom, int* right);
+    int GetLeftPos();
+
 private:
     std::string m_name;
     bool m_bEnable = false;
+
+    int m_top = 0;
+    int m_left = 0;
+    int m_bottom = 0;
+    int m_right = 0;
 };
 
 class hud
@@ -76,8 +85,12 @@ public:
     void Previous();
     void Next();
     std::string Into();
+    void MouseMove(const int x, const int y);
+    std::string Click(const int x, const int y);
     
 private:
+
+    void ResetRect();
 
     ISprite* m_sprCursor;
     IFont* m_font;
@@ -85,13 +98,15 @@ private:
 
     std::vector<Command> m_commandList;
 
-    const int STARTX = 750;
+    const int CENTERX = 750;
     const int STARTY = 850;
 
     const int INTERVAL = 100;
     const int CURSOR_PADDING_Y = -25;
 
-    int m_cursor = 0;
+    int m_cursorIndex = 0;
+    const int COMMAND_WIDTH = 100;
+    const int COMMAND_HEIGHT = 20;
 
 };
 }

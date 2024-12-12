@@ -45,6 +45,8 @@ void NSHud::hud::UpsertCommand(const std::string& name, const bool enable)
 
         m_commandList.push_back(command);
     }
+
+    ResetRect();
 }
 
 void NSHud::hud::RemoveCommand(const std::string& name)
@@ -56,79 +58,53 @@ void NSHud::hud::RemoveCommand(const std::string& name)
                                  });
 
     m_commandList.erase(result, m_commandList.end());
+
+    ResetRect();
 }
 
 void hud::Draw()
 {
     // コマンドを中央揃えで表示する
-    // 奇数の時
-    if (m_commandList.size() % 2 == 1)
+    for (int i = 0; i < (int)m_commandList.size(); ++i)
     {
-        int halfListSize = m_commandList.size() / 2;
-        for (std::size_t i = 0; i < m_commandList.size(); ++i)
+        bool enable = m_commandList.at(i).GetEnable();
+        // 選択可能コマンド
+        if (enable)
         {
-            int i_ = (int)i;
-
-            bool enable = m_commandList.at(i).GetEnable();
-            if (enable)
-            {
-                if (m_cursor == i_)
-                {
-                    m_font->DrawText_(m_commandList.at(i).GetName(),
-                                      STARTX + (INTERVAL * (i_ - halfListSize)),
-                                      STARTY,
-                                      255);
-                }
-                else
-                {
-                    m_font->DrawText_(m_commandList.at(i).GetName(),
-                                      STARTX + (INTERVAL * (i_ - halfListSize)),
-                                      STARTY,
-                                      128);
-                }
-            }
-            else
+            // 選択中コマンド
+            if (m_cursorIndex == i)
             {
                 m_font->DrawText_(m_commandList.at(i).GetName(),
-                                  STARTX + (INTERVAL * (i_ - halfListSize)),
-                                  STARTY,
-                                  64);
-            }
-
-            if (m_cursor == i_)
-            {
-                int x = 0;
-                x += STARTX;
-                x += INTERVAL * (i_ - halfListSize);
-                // 文字数の分カーソルの位置をずらす。
-                x += (m_commandList.at(i).GetName().size() / 2 - 1) * 10;
-                m_sprCursor->DrawImage(x,
-                                       STARTY + CURSOR_PADDING_Y);
-            }
-        }
-    }
-    else
-    {
-        int halfListSize = m_commandList.size() / 2;
-        for (std::size_t i = 0; i < m_commandList.size(); ++i)
-        {
-            int i_ = (int)i;
-
-            bool enable = m_commandList.at(i).GetEnable();
-            if (enable)
-            {
-                m_font->DrawText_(m_commandList.at(i).GetName(),
-                                  STARTX + (INTERVAL * (i_ - halfListSize)) + (INTERVAL / 2),
+                                  m_commandList.at(i).GetLeftPos(),
                                   STARTY,
                                   255);
             }
+            // 未選択コマンド
             else
             {
                 m_font->DrawText_(m_commandList.at(i).GetName(),
-                                  STARTX + (INTERVAL * (i_ - halfListSize)) + (INTERVAL / 2),
+                                  m_commandList.at(i).GetLeftPos(),
                                   STARTY,
-                                  127);
+                                  128);
             }
+        }
+        // 使用不可コマンド
+        else
+        {
+            m_font->DrawText_(m_commandList.at(i).GetName(),
+                              m_commandList.at(i).GetLeftPos(),
+                              STARTY,
+                              64);
+        }
+
+        // カーソルの表示
+        if (m_cursorIndex == i)
+        {
+            int x = 0;
+            x = m_commandList.at(i).GetLeftPos();
+            // 100/2ピクセル右にずらす。丸の半径が10ピクセルくらいなので少し左に戻す。
+            x += (COMMAND_WIDTH / 2) - 5;
+            m_sprCursor->DrawImage(x, STARTY + CURSOR_PADDING_Y);
         }
     }
 }
@@ -147,13 +123,13 @@ void NSHud::hud::Previous()
 
     while (true)
     {
-        --m_cursor;
-        if (m_cursor <= -1)
+        --m_cursorIndex;
+        if (m_cursorIndex <= -1)
         {
-            m_cursor = m_commandList.size() - 1;
+            m_cursorIndex = m_commandList.size() - 1;
         }
 
-        if (m_commandList.at(m_cursor).GetEnable() == false)
+        if (m_commandList.at(m_cursorIndex).GetEnable() == false)
         {
             continue;
         }
@@ -179,13 +155,13 @@ void NSHud::hud::Next()
 
     while (true)
     {
-        ++m_cursor;
-        if (m_cursor >= (int)m_commandList.size())
+        ++m_cursorIndex;
+        if (m_cursorIndex >= (int)m_commandList.size())
         {
-            m_cursor = 0;
+            m_cursorIndex = 0;
         }
 
-        if (m_commandList.at(m_cursor).GetEnable() == false)
+        if (m_commandList.at(m_cursorIndex).GetEnable() == false)
         {
             continue;
         }
@@ -200,7 +176,122 @@ void NSHud::hud::Next()
 std::string NSHud::hud::Into()
 {
     m_SE->PlayClick();
-    return m_commandList.at(m_cursor).GetName();
+    return m_commandList.at(m_cursorIndex).GetName();
+}
+
+void NSHud::hud::MouseMove(const int x, const int y)
+{
+    int index = -1;
+    for (int i = 0; i < (int)m_commandList.size(); ++i)
+    {
+        int top = 0;
+        int left = 0;
+        int bottom = 0;
+        int right = 0;
+        m_commandList.at(i).GetRect(&top, &left, &bottom, &right);
+
+        if (left <= x && x <= right)
+        {
+            if (top <= y && y <= bottom)
+            {
+                index = i;
+                break;
+            }
+        }
+    }
+    if (index != -1 && m_cursorIndex != index)
+    {
+        if (m_commandList.at(index).GetEnable())
+        {
+            m_cursorIndex = index;
+            m_SE->PlayMove();
+        }
+    }
+}
+
+std::string NSHud::hud::Click(const int x, const int y)
+{
+    int index = -1;
+    for (int i = 0; i < (int)m_commandList.size(); ++i)
+    {
+        int top = 0;
+        int left = 0;
+        int bottom = 0;
+        int right = 0;
+        m_commandList.at(i).GetRect(&top, &left, &bottom, &right);
+
+        if (left <= x && x <= right)
+        {
+            if (top <= y && y <= bottom)
+            {
+                index = i;
+                break;
+            }
+        }
+    }
+
+    if (index != -1)
+    {
+        if (m_commandList.at(index).GetEnable())
+        {
+            m_cursorIndex = index;
+            m_SE->PlayClick();
+        }
+    }
+
+    if (index == -1)
+    {
+        return "";
+    }
+    else
+    {
+        return m_commandList.at(m_cursorIndex).GetName();
+    }
+}
+
+void NSHud::hud::ResetRect()
+{
+    // 奇数の場合
+    if (m_commandList.size() % 2 == 1)
+    {
+        for (int i = 0; i < (int)m_commandList.size(); ++i)
+        {
+            int top = 0;
+            int left = 0;
+            int bottom = 0;
+            int right = 0;
+
+            top = STARTY;
+            bottom = STARTY + COMMAND_HEIGHT;
+
+            left = CENTERX;
+            left += INTERVAL * (i - (m_commandList.size() / 2));
+            right = left + COMMAND_WIDTH;
+
+            m_commandList.at(i).SetRect(top, left, bottom, right);
+        }
+    }
+    // 偶数の場合
+    else
+    {
+        for (int i = 0; i < (int)m_commandList.size(); ++i)
+        {
+            int top = 0;
+            int left = 0;
+            int bottom = 0;
+            int right = 0;
+
+            top = STARTY;
+            bottom = STARTY + COMMAND_HEIGHT;
+
+            left = CENTERX;
+            left += INTERVAL * (i - (m_commandList.size() / 2));
+            left += INTERVAL / 2;
+            right = left + COMMAND_WIDTH;
+
+            m_commandList.at(i).SetRect(top, left, bottom, right);
+        }
+    }
 }
 
 void NSHud::Command::SetName(const std::string& arg)
@@ -221,4 +312,25 @@ void NSHud::Command::SetEnable(const bool arg)
 bool NSHud::Command::GetEnable() const
 {
     return m_bEnable;
+}
+
+void NSHud::Command::SetRect(const int top, const int left, const int bottom, const int right)
+{
+    m_top = top;
+    m_left = left;
+    m_bottom = bottom;
+    m_right = right;
+}
+
+void NSHud::Command::GetRect(int* top, int* left, int* bottom, int* right)
+{
+    *top = m_top;
+    *left = m_left;
+    *bottom = m_bottom;
+    *right = m_right;
+}
+
+int NSHud::Command::GetLeftPos()
+{
+    return m_left;
 }
