@@ -18,121 +18,207 @@ static std::vector<std::string> split(const std::string& s, char delim)
     return result;
 }
 
-void hud::Init(IFont* font, ISprite* sprBack, ISprite* sprMiddle, ISprite* sprFront)
+void hud::Init(IFont* font, ISoundEffect* pSE, ISprite* sprCursor)
 {
     m_font = font;
-    m_sprBack = sprBack;
-    m_sprMiddle = sprMiddle;
-    m_sprFront = sprFront;
+    m_SE = pSE;
+    m_sprCursor = sprCursor;
 }
 
-void NSHud::hud::UpsertStatus(const std::string& name,
-                                        const int percent,
-                                        const int percentSub,
-                                        const bool visible)
+void NSHud::hud::UpsertCommand(const std::string& name, const bool enable)
 {
-    auto result = std::find_if(m_statusList.begin(), m_statusList.end(),
-                               [&](const StatusItem& x)
+    auto result = std::find_if(m_commandList.begin(), m_commandList.end(),
+                               [&](const Command& x)
                                {
                                    return x.GetName() == name;
                                });
 
-    if (result != m_statusList.end())
+    if (result != m_commandList.end())
     {
-        result->SetPercent(percent);
-        result->SetPercentSub(percentSub);
-        result->SetBarVisible(visible);
+        result->SetEnable(enable);
     }
     else
     {
-        StatusItem statusItem;
-        statusItem.SetName(name);
-        statusItem.SetPercent(percent);
-        statusItem.SetPercentSub(percentSub);
-        statusItem.SetBarVisible(visible);
+        Command command;
+        command.SetName(name);
+        command.SetEnable(enable);
 
-        m_statusList.push_back(statusItem);
+        m_commandList.push_back(command);
     }
 }
 
-void NSHud::hud::RemoveStatus(const std::string& name)
+void NSHud::hud::RemoveCommand(const std::string& name)
 {
-    auto result = std::remove_if(m_statusList.begin(), m_statusList.end(),
-                                 [&](const StatusItem& x)
+    auto result = std::remove_if(m_commandList.begin(), m_commandList.end(),
+                                 [&](const Command& x)
                                  {
                                      return x.GetName() == name;
                                  });
 
-    m_statusList.erase(result, m_statusList.end());
+    m_commandList.erase(result, m_commandList.end());
 }
 
 void hud::Draw()
 {
-    // どれだけステータス異常があっても表示できるのは8行までとする？
-    for (std::size_t i = 0; i < 8; ++i)
+    // コマンドを中央揃えで表示する
+    // 奇数の時
+    if (m_commandList.size() % 2 == 1)
     {
-        if (m_statusList.size() <= i)
+        int halfListSize = m_commandList.size() / 2;
+        for (std::size_t i = 0; i < m_commandList.size(); ++i)
         {
-            break;
+            int i_ = (int)i;
+
+            bool enable = m_commandList.at(i).GetEnable();
+            if (enable)
+            {
+                if (m_cursor == i_)
+                {
+                    m_font->DrawText_(m_commandList.at(i).GetName(),
+                                      STARTX + (INTERVAL * (i_ - halfListSize)),
+                                      STARTY,
+                                      255);
+                }
+                else
+                {
+                    m_font->DrawText_(m_commandList.at(i).GetName(),
+                                      STARTX + (INTERVAL * (i_ - halfListSize)),
+                                      STARTY,
+                                      128);
+                }
+            }
+            else
+            {
+                m_font->DrawText_(m_commandList.at(i).GetName(),
+                                  STARTX + (INTERVAL * (i_ - halfListSize)),
+                                  STARTY,
+                                  64);
+            }
+
+            if (m_cursor == i_)
+            {
+                int x = 0;
+                x += STARTX;
+                x += INTERVAL * (i_ - halfListSize);
+                // 文字数の分カーソルの位置をずらす。
+                x += (m_commandList.at(i).GetName().size() / 2 - 1) * 10;
+                m_sprCursor->DrawImage(x,
+                                       STARTY + CURSOR_PADDING_Y);
+            }
         }
-
-        m_font->DrawText_(m_statusList.at(i).GetName(),
-                          STARTX + 10,
-                          STARTY + (INTERVAL * (int)i));
-
-        if (m_statusList.at(i).GetBarVisible())
+    }
+    else
+    {
+        int halfListSize = m_commandList.size() / 2;
+        for (std::size_t i = 0; i < m_commandList.size(); ++i)
         {
-            m_sprBack->DrawImage(100,
-                                 STARTX,
-                                 PADDING + STARTY + (INTERVAL * (int)i));
+            int i_ = (int)i;
 
-            m_sprMiddle->DrawImage(m_statusList.at(i).GetPercentSub(),
-                                   STARTX,
-                                   PADDING + STARTY + (INTERVAL * (int)i));
-
-            m_sprFront->DrawImage(m_statusList.at(i).GetPercent(),
-                                  STARTX,
-                                  PADDING + STARTY + (INTERVAL * (int)i));
+            bool enable = m_commandList.at(i).GetEnable();
+            if (enable)
+            {
+                m_font->DrawText_(m_commandList.at(i).GetName(),
+                                  STARTX + (INTERVAL * (i_ - halfListSize)) + (INTERVAL / 2),
+                                  STARTY,
+                                  255);
+            }
+            else
+            {
+                m_font->DrawText_(m_commandList.at(i).GetName(),
+                                  STARTX + (INTERVAL * (i_ - halfListSize)) + (INTERVAL / 2),
+                                  STARTY,
+                                  127);
+            }
         }
     }
 }
 
-void NSHud::StatusItem::SetName(const std::string& arg)
+void NSHud::hud::Previous()
+{
+    auto it = std::find_if(m_commandList.begin(), m_commandList.end(),
+                           [](const Command& x)
+                           {
+                               return x.GetEnable();
+                           });
+    if (it == m_commandList.end())
+    {
+        return;
+    }
+
+    while (true)
+    {
+        --m_cursor;
+        if (m_cursor <= -1)
+        {
+            m_cursor = m_commandList.size() - 1;
+        }
+
+        if (m_commandList.at(m_cursor).GetEnable() == false)
+        {
+            continue;
+        }
+        else
+        {
+            break;
+        }
+    }
+    m_SE->PlayMove();
+}
+
+void NSHud::hud::Next()
+{
+    auto it = std::find_if(m_commandList.begin(), m_commandList.end(),
+                           [](const Command& x)
+                           {
+                               return x.GetEnable();
+                           });
+    if (it == m_commandList.end())
+    {
+        return;
+    }
+
+    while (true)
+    {
+        ++m_cursor;
+        if (m_cursor >= (int)m_commandList.size())
+        {
+            m_cursor = 0;
+        }
+
+        if (m_commandList.at(m_cursor).GetEnable() == false)
+        {
+            continue;
+        }
+        else
+        {
+            break;
+        }
+    }
+    m_SE->PlayMove();
+}
+
+std::string NSHud::hud::Into()
+{
+    m_SE->PlayClick();
+    return m_commandList.at(m_cursor).GetName();
+}
+
+void NSHud::Command::SetName(const std::string& arg)
 {
     m_name = arg;
 }
 
-std::string NSHud::StatusItem::GetName() const
+std::string NSHud::Command::GetName() const
 {
     return m_name;
 }
 
-void NSHud::StatusItem::SetPercent(const int arg)
+void NSHud::Command::SetEnable(const bool arg)
 {
-    m_percent = arg;
+    m_bEnable = arg;
 }
 
-int NSHud::StatusItem::GetPercent() const
+bool NSHud::Command::GetEnable() const
 {
-    return m_percent;
-}
-
-void NSHud::StatusItem::SetPercentSub(const int arg)
-{
-    m_percentSub = arg;
-}
-
-int NSHud::StatusItem::GetPercentSub() const
-{
-    return m_percentSub;
-}
-
-void NSHud::StatusItem::SetBarVisible(const bool arg)
-{
-    m_visible = arg;
-}
-
-bool NSHud::StatusItem::GetBarVisible() const
-{
-    return m_visible;
+    return m_bEnable;
 }

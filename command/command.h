@@ -15,8 +15,7 @@ namespace NSHud
 class ISprite
 {
 public:
-    virtual void DrawImage(const int percent,
-                           const int x,
+    virtual void DrawImage(const int x,
                            const int y,
                            const int transparency = 255) = 0;
 
@@ -27,63 +26,73 @@ public:
 class IFont
 {
 public:
-    virtual void DrawText_(const std::string& msg, const int x, const int y) = 0;
+    virtual void DrawText_(const std::string& msg,
+                           const int x,
+                           const int y,
+                           const int transparent) = 0;
+
     virtual void Init() = 0;
     virtual ~IFont() {};
 };
 
-class StatusItem
+class ISoundEffect
+{
+public:
+    virtual void PlayMove() = 0;
+    virtual void PlayClick() = 0;
+    virtual void PlayBack() = 0;
+    virtual void Init() = 0;
+    virtual ~ISoundEffect() {};
+};
+
+
+class Command
 {
 public:
     void SetName(const std::string& arg);
     std::string GetName() const;
 
-    // 0 ~ 100‚Ì101’iŠK
-    void SetPercent(const int arg);
-    int GetPercent() const;
-
-    void SetPercentSub(const int arg);
-    int GetPercentSub() const;
-
-    void SetBarVisible(const bool arg);
-    bool GetBarVisible() const;
+    void SetEnable(const bool arg);
+    bool GetEnable() const;
 
 private:
-
     std::string m_name;
-    int m_percent = 0;
-    int m_percentSub = 0;
-    bool m_visible = false;
+    bool m_bEnable = false;
 };
 
 class hud
 {
 public:
 
-    void Init(IFont* font, ISprite* sprBack, ISprite* sprMiddle, ISprite* sprFront);
-    void UpsertStatus(const std::string& name,
-                      const int percent,
-                      const int percentSub,
-                      const bool visible);
+    void Init(IFont* font, ISoundEffect* SE, ISprite* sprCursor);
 
-    void RemoveStatus(const std::string& name);
+    void UpsertCommand(const std::string& name,
+                       const bool enable);
+
+    void RemoveCommand(const std::string& name);
 
     void Draw();
+
+    void Previous();
+    void Next();
+    std::string Into();
     
 private:
 
-    ISprite* m_sprBack;
-    ISprite* m_sprMiddle;
-    ISprite* m_sprFront;
+    ISprite* m_sprCursor;
     IFont* m_font;
+    ISoundEffect* m_SE;
 
-    std::vector<StatusItem> m_statusList;
+    std::vector<Command> m_commandList;
 
-    const int STARTX = 1300;
-    const int STARTY = 400;
+    const int STARTX = 750;
+    const int STARTY = 850;
 
-    const int INTERVAL = 50;
-    const int PADDING = 25;
+    const int INTERVAL = 100;
+    const int CURSOR_PADDING_Y = -25;
+
+    int m_cursor = 0;
+
 };
 }
 

@@ -28,15 +28,15 @@ public:
     {
     }
 
-    void DrawImage(const int percent, const int x, const int y, const int transparency) override
+    void DrawImage(const int x, const int y, const int transparency) override
     {
         D3DXVECTOR3 pos {(float)x, (float)y, 0.f};
         m_D3DSprite->Begin(D3DXSPRITE_ALPHABLEND);
         RECT rect = {
             0,
             0,
-            static_cast<LONG>(m_width*percent/100),
-            static_cast<LONG>(m_height/2) };
+            static_cast<LONG>(m_width),
+            static_cast<LONG>(m_height) };
         D3DXVECTOR3 center { 0, 0, 0 };
         m_D3DSprite->Draw(
             m_pD3DTexture,
@@ -114,11 +114,14 @@ public:
             &m_pFont);
     }
 
-    virtual void DrawText_(const std::string& msg, const int x, const int y)
+    virtual void DrawText_(const std::string& msg,
+                           const int x,
+                           const int y,
+                           const int transparent)
     {
         RECT rect = { x, y, 0, 0 };
         m_pFont->DrawText(NULL, msg.c_str(), -1, &rect, DT_LEFT | DT_NOCLIP,
-            D3DCOLOR_ARGB(255, 255, 255, 255));
+            D3DCOLOR_ARGB(transparent, 255, 255, 255));
     }
 
     ~Font()
@@ -130,6 +133,27 @@ private:
 
     LPDIRECT3DDEVICE9 m_pD3DDevice = NULL;
     LPD3DXFONT m_pFont = NULL;
+};
+
+class SoundEffect : public ISoundEffect
+{
+    virtual void PlayMove() override
+    {
+        PlaySound("cursor_move.wav", NULL, SND_FILENAME | SND_ASYNC);
+    }
+    virtual void PlayClick() override
+    {
+        PlaySound("cursor_confirm.wav", NULL, SND_FILENAME | SND_ASYNC);
+        //        PlaySound("cursor_move.wav", NULL, SND_FILENAME | SND_ASYNC);
+    }
+    virtual void PlayBack() override
+    {
+        PlaySound("cursor_cancel.wav", NULL, SND_FILENAME | SND_ASYNC);
+    }
+    virtual void Init() override
+    {
+
+    }
 };
 
 
@@ -243,30 +267,24 @@ HRESULT InitD3D(HWND hWnd)
         NULL
     );
 
-    Sprite* sprBack = new Sprite(g_pd3dDevice);
-    sprBack->Load("status_back.png");
-
-    Sprite* sprMiddle = new Sprite(g_pd3dDevice);
-    sprMiddle->Load("status_middle.png");
-
-    Sprite* sprFront = new Sprite(g_pd3dDevice);
-    sprFront->Load("status_front.png");
+    Sprite* sprCursor = new Sprite(g_pd3dDevice);
+    sprCursor->Load("command_cursor.png");
 
     IFont* pFont = new Font(g_pd3dDevice);
     pFont->Init();
 
-    menu.Init(pFont, sprBack, sprMiddle, sprFront);
+    ISoundEffect* pSE = new SoundEffect();
+
+    menu.Init(pFont, pSE, sprCursor);
     
-    menu.UpsertStatus("身体のスタミナ", 100, 100, true);
-    menu.UpsertStatus("脳のスタミナ", 10, 20, true);
-    menu.UpsertStatus("水分", 10, 40, true);
-    menu.UpsertStatus("糖分", 50, 100, true);
-    menu.UpsertStatus("タンパク質", 60, 80, true);
-//    menu.UpsertStatus("脂質", 100, 100, true);
-//    menu.UpsertStatus("ビタミン", 100, 100, true);
-//    menu.UpsertStatus("ミネラル", 100, 100, true);
-    menu.UpsertStatus("頭痛", 100, 100, false);
-    menu.UpsertStatus("腹痛", 100, 100, false);
+    menu.UpsertCommand("伐採", true);
+    menu.UpsertCommand("横になる", true);
+    menu.UpsertCommand("座る", true);
+    menu.UpsertCommand("採集", true);
+    menu.UpsertCommand("加工", false);
+    menu.UpsertCommand("調理", false);
+    menu.UpsertCommand("釣り", true);
+    //menu.UpsertCommand("イカダを漕ぐ", false);
 
     return S_OK;
 }
@@ -351,10 +369,20 @@ LRESULT WINAPI MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 bShowMenu = true;
             }
             break;
-        // メニューを表示している最中にメニューに表示されている内容を変える
-        case VK_F2:
+        case VK_LEFT:
         {
-            // menu.SetItem(itemInfoList);
+            menu.Previous();
+            break;
+        }
+        case VK_RIGHT:
+        {
+            menu.Next();
+            break;
+        }
+        case VK_RETURN:
+        {
+            menu.Into();
+            break;
         }
         case VK_ESCAPE:
             PostQuitMessage(0);
