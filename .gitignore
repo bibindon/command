@@ -3,8 +3,23 @@
 ################################################################################
 
 /.vs
-/Debug
 *.user
 /Sample/Debug
 /packages/Microsoft.DXSDK.D3DX.9.29.952.8
 /command/Debug
+/Sample/Release
+/command/Release
+/Release/simple.cso
+/Release/Sample.pdb
+/Release/Sample.exe
+/Release/d3dx9_43.dll
+/Release/d3dx11_43.dll
+/Release/d3dx10_43.dll
+/Release/D3DCompiler_43.dll
+/Debug/simple.cso
+/Debug/Sample.pdb
+/Debug/Sample.exe
+/Debug/d3dx9d_43.dll
+/Debug/d3dx11d_43.dll
+/Debug/d3dx10d_43.dll
+/Debug/D3DCompiler_43.dll
