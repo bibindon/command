@@ -99,14 +99,14 @@ private:
     std::vector<Command> m_commandList;
 
     const int CENTERX = 750;
-    const int STARTY = 850;
+    const int STARTY = 800;
 
     const int INTERVAL = 100;
-    const int CURSOR_PADDING_Y = -25;
+    const int CURSOR_PADDING_Y = 16;
 
     int m_cursorIndex = 0;
     const int COMMAND_WIDTH = 100;
-    const int COMMAND_HEIGHT = 20;
+    const int COMMAND_HEIGHT = 100;
 
 };
 }

@@ -119,8 +119,8 @@ public:
                            const int y,
                            const int transparent)
     {
-        RECT rect = { x, y, x + 100, 0 };
-        m_pFont->DrawText(NULL, msg.c_str(), -1, &rect, DT_CENTER | DT_NOCLIP,
+        RECT rect = { x, y, x + 100, y + 100 };
+        m_pFont->DrawText(NULL, msg.c_str(), -1, &rect, DT_CENTER | DT_VCENTER | DT_NOCLIP,
             D3DCOLOR_ARGB(transparent, 255, 255, 255));
     }
 
