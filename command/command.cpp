@@ -25,6 +25,13 @@ void CommandLib::Init(IFont* font, ISoundEffect* pSE, ISprite* sprCursor)
     m_sprCursor = sprCursor;
 }
 
+void NSCommand::CommandLib::Finalize()
+{
+    delete m_font;
+    delete m_SE;
+    delete m_sprCursor;
+}
+
 void NSCommand::CommandLib::UpsertCommand(const std::string& name, const bool enable)
 {
     auto result = std::find_if(m_commandList.begin(), m_commandList.end(),

@@ -74,6 +74,7 @@ class CommandLib
 public:
 
     void Init(IFont* font, ISoundEffect* SE, ISprite* sprCursor);
+    void Finalize();
 
     void UpsertCommand(const std::string& name,
                        const bool enable);
