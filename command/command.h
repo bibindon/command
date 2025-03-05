@@ -81,6 +81,8 @@ public:
 
     void RemoveCommand(const std::string& name);
 
+    void RemoveAll();
+
     void Draw();
 
     void Previous();

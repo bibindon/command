@@ -69,6 +69,11 @@ void NSCommand::CommandLib::RemoveCommand(const std::string& name)
     ResetRect();
 }
 
+void NSCommand::CommandLib::RemoveAll()
+{
+    m_commandList.clear();
+}
+
 void CommandLib::Draw()
 {
     // コマンドを中央揃えで表示する
