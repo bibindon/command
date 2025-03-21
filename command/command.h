@@ -104,7 +104,7 @@ private:
     const int CENTERX = 750;
     const int STARTY = 800;
 
-    const int INTERVAL = 100;
+    const int INTERVAL = 150;
     const int CURSOR_PADDING_Y = 16;
 
     int m_cursorIndex = 0;

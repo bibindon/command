@@ -282,7 +282,8 @@ HRESULT InitD3D(HWND hWnd)
     menu.UpsertCommand("採集", true);
     menu.UpsertCommand("加工", false);
     menu.UpsertCommand("調理", false);
-    menu.UpsertCommand("釣り", true);
+    menu.UpsertCommand("イカダに乗る", true);
+    menu.UpsertCommand("イカダの袋を見る", true);
     //menu.UpsertCommand("イカダを漕ぐ", false);
 
     return S_OK;
