@@ -76,6 +76,32 @@ void NSCommand::CommandLib::RemoveAll()
 
 void CommandLib::Draw()
 {
+    // もし、選択不可能なコマンド上にカーソルがあったら、
+    // 選択可能なコマンド上にカーソルを移動させる。
+
+    if (!m_commandList.at(m_cursorIndex).GetEnable())
+    {
+        m_cursorIndex = 0;
+
+        while (true)
+        {
+            if (m_commandList.at(m_cursorIndex).GetEnable() == false)
+            {
+                m_cursorIndex++;
+                if (m_cursorIndex >= m_commandList.size())
+                {
+                    m_cursorIndex =  -1;
+                    break;
+                }
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
     // コマンドを中央揃えで表示する
     for (int i = 0; i < (int)m_commandList.size(); ++i)
     {
