@@ -88,7 +88,7 @@ void CommandLib::Draw()
             if (m_commandList.at(m_cursorIndex).GetEnable() == false)
             {
                 m_cursorIndex++;
-                if (m_cursorIndex >= m_commandList.size())
+                if (m_cursorIndex >= (int)m_commandList.size())
                 {
                     m_cursorIndex =  -1;
                     break;
@@ -164,7 +164,7 @@ void NSCommand::CommandLib::Previous()
         --m_cursorIndex;
         if (m_cursorIndex <= -1)
         {
-            m_cursorIndex = m_commandList.size() - 1;
+            m_cursorIndex = (int)m_commandList.size() - 1;
         }
 
         if (m_commandList.at(m_cursorIndex).GetEnable() == false)
@@ -303,7 +303,7 @@ void NSCommand::CommandLib::ResetRect()
             bottom = STARTY + COMMAND_HEIGHT;
 
             left = CENTERX;
-            left += INTERVAL * (i - (m_commandList.size() / 2));
+            left += INTERVAL * (i - ((int)m_commandList.size() / 2));
             right = left + COMMAND_WIDTH;
 
             m_commandList.at(i).SetRect(top, left, bottom, right);
@@ -323,7 +323,7 @@ void NSCommand::CommandLib::ResetRect()
             bottom = STARTY + COMMAND_HEIGHT;
 
             left = CENTERX;
-            left += INTERVAL * (i - (m_commandList.size() / 2));
+            left += INTERVAL * (i - ((int)m_commandList.size() / 2));
             left += INTERVAL / 2;
             right = left + COMMAND_WIDTH;
 
