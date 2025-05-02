@@ -97,21 +97,38 @@ public:
     {
     }
 
-    void Init()
+    void Init(const bool bEnglish)
     {
-        HRESULT hr = D3DXCreateFont(
-            m_pD3DDevice,
-            20,
-            0,
-            FW_THIN,
-            1,
-            false,
-            SHIFTJIS_CHARSET,
-            OUT_TT_ONLY_PRECIS,
-            ANTIALIASED_QUALITY,
-            FF_DONTCARE,
-            "游明朝",
-            &m_pFont);
+        if (!bEnglish)
+        {
+            HRESULT hr = D3DXCreateFont(m_pD3DDevice,
+                                        20,
+                                        0,
+                                        FW_THIN,
+                                        1,
+                                        false,
+                                        SHIFTJIS_CHARSET,
+                                        OUT_TT_ONLY_PRECIS,
+                                        ANTIALIASED_QUALITY,
+                                        FF_DONTCARE,
+                                        "游明朝",
+                                        &m_pFont);
+        }
+        else
+        {
+            HRESULT hr = D3DXCreateFont(m_pD3DDevice,
+                                        20,
+                                        0,
+                                        FW_THIN,
+                                        1,
+                                        false,
+                                        DEFAULT_CHARSET,
+                                        OUT_TT_ONLY_PRECIS,
+                                        CLEARTYPE_NATURAL_QUALITY,
+                                        FF_DONTCARE,
+                                        "Courier New",
+                                        &m_pFont);
+        }
     }
 
     virtual void DrawText_(const std::string& msg,
@@ -270,21 +287,28 @@ HRESULT InitD3D(HWND hWnd)
     sprCursor->Load("command_cursor.png");
 
     IFont* pFont = new Font(g_pd3dDevice);
-    pFont->Init();
 
     ISoundEffect* pSE = new SoundEffect();
 
-    menu.Init(pFont, pSE, sprCursor);
+    menu.Init(pFont, pSE, sprCursor, true);
     
-    menu.UpsertCommand("伐採", true);
-    menu.UpsertCommand("横になる", true);
-    menu.UpsertCommand("座る", true);
-    menu.UpsertCommand("採集", true);
-    menu.UpsertCommand("加工", false);
-    menu.UpsertCommand("調理", false);
-    menu.UpsertCommand("イカダに乗る", true);
-    menu.UpsertCommand("イカダの袋を見る", true);
+//    menu.UpsertCommand("伐採", true);
+//    menu.UpsertCommand("横になる", true);
+//    menu.UpsertCommand("座る", true);
+//    menu.UpsertCommand("採集", true);
+//    menu.UpsertCommand("加工", false);
+//    menu.UpsertCommand("調理", false);
+//    menu.UpsertCommand("イカダに乗る", true);
+//    menu.UpsertCommand("イカダの袋を見る", true);
     //menu.UpsertCommand("イカダを漕ぐ", false);
+
+    menu.UpsertCommand("Logging", true);
+    menu.UpsertCommand("Lie down", true);
+    menu.UpsertCommand("Sit down", true);
+    menu.UpsertCommand("Forage", true);
+    menu.UpsertCommand("Craft", false);
+    menu.UpsertCommand("Cook", false);
+    menu.UpsertCommand("Ride a raft", true);
 
     return S_OK;
 }

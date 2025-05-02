@@ -31,7 +31,7 @@ public:
                            const int y,
                            const int transparent) = 0;
 
-    virtual void Init() = 0;
+    virtual void Init(const bool bEnglish) = 0;
     virtual ~IFont() {};
 };
 
@@ -73,7 +73,7 @@ class CommandLib
 {
 public:
 
-    void Init(IFont* font, ISoundEffect* SE, ISprite* sprCursor);
+    void Init(IFont* font, ISoundEffect* SE, ISprite* sprCursor, const bool bEnglish);
     void Finalize();
 
     void UpsertCommand(const std::string& name,

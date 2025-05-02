@@ -18,11 +18,13 @@ static std::vector<std::string> split(const std::string& s, char delim)
     return result;
 }
 
-void CommandLib::Init(IFont* font, ISoundEffect* pSE, ISprite* sprCursor)
+void CommandLib::Init(IFont* font, ISoundEffect* pSE, ISprite* sprCursor, const bool bEnglish)
 {
     m_font = font;
     m_SE = pSE;
     m_sprCursor = sprCursor;
+
+    m_font->Init(bEnglish);
 }
 
 void NSCommand::CommandLib::Finalize()
