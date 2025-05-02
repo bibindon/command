@@ -25,6 +25,7 @@ void CommandLib::Init(IFont* font, ISoundEffect* pSE, ISprite* sprCursor, const 
     m_sprCursor = sprCursor;
 
     m_font->Init(bEnglish);
+    m_SE->Init();
 }
 
 void NSCommand::CommandLib::Finalize()
