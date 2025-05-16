@@ -1,3 +1,4 @@
+// HLSLのコンパイラはBOMありUTF8をコンパイルできないのでBOMなしUTF8
 float4x4 matWorldViewProj;
 float4 lightNormal = { 0.3f, 1.0f, 0.5f, 0.0f };
 
