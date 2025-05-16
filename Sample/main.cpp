@@ -1,4 +1,4 @@
-#pragma comment( lib, "d3d9.lib" )
+ï»¿#pragma comment( lib, "d3d9.lib" )
 #if defined(DEBUG) || defined(_DEBUG)
 #pragma comment( lib, "d3dx9d.lib" )
 #else
@@ -111,7 +111,7 @@ public:
                                         OUT_TT_ONLY_PRECIS,
                                         ANTIALIASED_QUALITY,
                                         FF_DONTCARE,
-                                        "Ÿà–¾’©",
+                                        "æ¸¸æ˜Žæœ",
                                         &m_pFont);
         }
         else
@@ -234,7 +234,7 @@ HRESULT InitD3D(HWND hWnd)
         OUT_TT_ONLY_PRECIS,
         ANTIALIASED_QUALITY,
         FF_DONTCARE,
-        "‚l‚r ƒSƒVƒbƒN",
+        "ï¼­ï¼³ ã‚´ã‚·ãƒƒã‚¯",
         &g_pFont);
     if FAILED(hr)
     {
@@ -247,7 +247,7 @@ HRESULT InitD3D(HWND hWnd)
         g_pd3dDevice, NULL, &pD3DXMtrlBuffer, NULL,
         &dwNumMaterials, &pMesh)))
     {
-        MessageBox(NULL, "Xƒtƒ@ƒCƒ‹‚Ì“Ç‚Ýž‚Ý‚ÉŽ¸”s‚µ‚Ü‚µ‚½", NULL, MB_OK);
+        MessageBox(NULL, "Xãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ", NULL, MB_OK);
         return E_FAIL;
     }
     d3dxMaterials = (D3DXMATERIAL*)pD3DXMtrlBuffer->GetBufferPointer();
@@ -266,7 +266,7 @@ HRESULT InitD3D(HWND hWnd)
                 d3dxMaterials[i].pTextureFilename,
                 &pTextures[i])))
             {
-                MessageBox(NULL, "ƒeƒNƒXƒ`ƒƒ‚Ì“Ç‚Ýž‚Ý‚ÉŽ¸”s‚µ‚Ü‚µ‚½", NULL, MB_OK);
+                MessageBox(NULL, "ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ", NULL, MB_OK);
             }
         }
     }
@@ -292,15 +292,15 @@ HRESULT InitD3D(HWND hWnd)
 
     menu.Init(pFont, pSE, sprCursor, true);
     
-//    menu.UpsertCommand("”°Ì", true);
-//    menu.UpsertCommand("‰¡‚É‚È‚é", true);
-//    menu.UpsertCommand("À‚é", true);
-//    menu.UpsertCommand("ÌW", true);
-//    menu.UpsertCommand("‰ÁH", false);
-//    menu.UpsertCommand("’²—", false);
-//    menu.UpsertCommand("ƒCƒJƒ_‚Éæ‚é", true);
-//    menu.UpsertCommand("ƒCƒJƒ_‚Ì‘Ü‚ðŒ©‚é", true);
-    //menu.UpsertCommand("ƒCƒJƒ_‚ð‘†‚®", false);
+//    menu.UpsertCommand("ä¼æŽ¡", true);
+//    menu.UpsertCommand("æ¨ªã«ãªã‚‹", true);
+//    menu.UpsertCommand("åº§ã‚‹", true);
+//    menu.UpsertCommand("æŽ¡é›†", true);
+//    menu.UpsertCommand("åŠ å·¥", false);
+//    menu.UpsertCommand("èª¿ç†", false);
+//    menu.UpsertCommand("ã‚¤ã‚«ãƒ€ã«ä¹—ã‚‹", true);
+//    menu.UpsertCommand("ã‚¤ã‚«ãƒ€ã®è¢‹ã‚’è¦‹ã‚‹", true);
+    //menu.UpsertCommand("ã‚¤ã‚«ãƒ€ã‚’æ¼•ã", false);
 
     menu.UpsertCommand("Logging", true);
     menu.UpsertCommand("Lie down", true);
@@ -346,7 +346,7 @@ VOID Render()
     if (SUCCEEDED(g_pd3dDevice->BeginScene()))
     {
         char msg[128];
-        strcpy_s(msg, 128, "CƒL[‚ÅƒXƒe[ƒ^ƒX‚ð•\Ž¦");
+        strcpy_s(msg, 128, "Cã‚­ãƒ¼ã§ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¡¨ç¤º");
         TextDraw(g_pFont, msg, 0, 0);
 
         pEffect->SetTechnique("BasicTec");
