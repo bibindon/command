@@ -4,11 +4,11 @@
 
 using namespace NSCommand;
 
-static std::vector<std::string> split(const std::string& s, char delim)
+static std::vector<std::wstring> split(const std::wstring& s, wchar_t delim)
 {
-    std::vector<std::string> result;
-    std::stringstream ss(s);
-    std::string item;
+    std::vector<std::wstring> result;
+    std::wstringstream ss(s);
+    std::wstring item;
 
     while (getline(ss, item, delim))
     {
@@ -35,7 +35,7 @@ void NSCommand::CommandLib::Finalize()
     delete m_sprCursor;
 }
 
-void NSCommand::CommandLib::UpsertCommand(const std::string& name, const bool enable)
+void NSCommand::CommandLib::UpsertCommand(const std::wstring& name, const bool enable)
 {
     auto result = std::find_if(m_commandList.begin(), m_commandList.end(),
                                [&](const Command& x)
@@ -59,7 +59,7 @@ void NSCommand::CommandLib::UpsertCommand(const std::string& name, const bool en
     ResetRect();
 }
 
-void NSCommand::CommandLib::RemoveCommand(const std::string& name)
+void NSCommand::CommandLib::RemoveCommand(const std::wstring& name)
 {
     auto result = std::remove_if(m_commandList.begin(), m_commandList.end(),
                                  [&](const Command& x)
@@ -215,7 +215,7 @@ void NSCommand::CommandLib::Next()
     m_SE->PlayMove();
 }
 
-std::string NSCommand::CommandLib::Into()
+std::wstring NSCommand::CommandLib::Into()
 {
     m_SE->PlayClick();
     return m_commandList.at(m_cursorIndex).GetName();
@@ -251,7 +251,7 @@ void NSCommand::CommandLib::MouseMove(const int x, const int y)
     }
 }
 
-std::string NSCommand::CommandLib::Click(const int x, const int y)
+std::wstring NSCommand::CommandLib::Click(const int x, const int y)
 {
     int index = -1;
     for (int i = 0; i < (int)m_commandList.size(); ++i)
@@ -283,7 +283,7 @@ std::string NSCommand::CommandLib::Click(const int x, const int y)
 
     if (index == -1)
     {
-        return "";
+        return std::wstring();
     }
     else
     {
@@ -336,12 +336,12 @@ void NSCommand::CommandLib::ResetRect()
     }
 }
 
-void NSCommand::Command::SetName(const std::string& arg)
+void NSCommand::Command::SetName(const std::wstring& arg)
 {
     m_name = arg;
 }
 
-std::string NSCommand::Command::GetName() const
+std::wstring NSCommand::Command::GetName() const
 {
     return m_name;
 }

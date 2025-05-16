@@ -1,19 +1,20 @@
-﻿#pragma comment( lib, "d3d9.lib" )
+﻿#pragma comment( lib, "d3d9.lib")
 #if defined(DEBUG) || defined(_DEBUG)
-#pragma comment( lib, "d3dx9d.lib" )
+#pragma comment( lib, "d3dx9d.lib")
 #else
-#pragma comment( lib, "d3dx9.lib" )
+#pragma comment( lib, "d3dx9.lib")
 #endif
 
 #pragma comment (lib, "winmm.lib")
 
-#pragma comment( lib, "command.lib" )
+#pragma comment( lib, "command.lib")
 
 #include "..\command\command.h"
 
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <string>
+#include <cwchar>
 
 using namespace NSCommand;
 
@@ -48,7 +49,7 @@ public:
 
     }
 
-    void Load(const std::string& filepath) override
+    void Load(const std::wstring& filepath) override
     {
         LPD3DXSPRITE tempSprite { nullptr };
         if (FAILED(D3DXCreateSprite(m_pD3DDevice, &m_D3DSprite)))
@@ -56,10 +57,9 @@ public:
             throw std::exception("Failed to create a sprite.");
         }
 
-        if (FAILED(D3DXCreateTextureFromFile(
-            m_pD3DDevice,
-            filepath.c_str(),
-            &m_pD3DTexture)))
+        if (FAILED(D3DXCreateTextureFromFile(m_pD3DDevice,
+                                             filepath.c_str(),
+                                             &m_pD3DTexture)))
         {
             throw std::exception("Failed to create a texture.");
         }
@@ -111,7 +111,7 @@ public:
                                         OUT_TT_ONLY_PRECIS,
                                         ANTIALIASED_QUALITY,
                                         FF_DONTCARE,
-                                        "游明朝",
+                                        TEXT("游明朝"),
                                         &m_pFont);
         }
         else
@@ -126,12 +126,12 @@ public:
                                         OUT_TT_ONLY_PRECIS,
                                         CLEARTYPE_NATURAL_QUALITY,
                                         FF_DONTCARE,
-                                        "Courier New",
+                                        TEXT("Courier New"),
                                         &m_pFont);
         }
     }
 
-    virtual void DrawText_(const std::string& msg,
+    virtual void DrawText_(const std::wstring& msg,
                            const int x,
                            const int y,
                            const int transparent)
@@ -156,15 +156,15 @@ class SoundEffect : public ISoundEffect
 {
     virtual void PlayMove() override
     {
-        PlaySound("cursor_move.wav", NULL, SND_FILENAME | SND_ASYNC);
+        PlaySound(TEXT("cursor_move.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
     virtual void PlayClick() override
     {
-        PlaySound("cursor_confirm.wav", NULL, SND_FILENAME | SND_ASYNC);
+        PlaySound(TEXT("cursor_confirm.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
     virtual void PlayBack() override
     {
-        PlaySound("cursor_cancel.wav", NULL, SND_FILENAME | SND_ASYNC);
+        PlaySound(TEXT("cursor_cancel.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
     virtual void Init() override
     {
@@ -187,7 +187,7 @@ bool bShowMenu = true;
 
 CommandLib menu;
 
-void TextDraw(LPD3DXFONT pFont, char* text, int X, int Y)
+void TextDraw(LPD3DXFONT pFont, wchar_t* text, int X, int Y)
 {
     RECT rect = { X,Y,0,0 };
     pFont->DrawText(NULL, text, -1, &rect, DT_LEFT | DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
@@ -234,7 +234,7 @@ HRESULT InitD3D(HWND hWnd)
         OUT_TT_ONLY_PRECIS,
         ANTIALIASED_QUALITY,
         FF_DONTCARE,
-        "ＭＳ ゴシック",
+        TEXT("ＭＳ ゴシック"),
         &g_pFont);
     if FAILED(hr)
     {
@@ -243,11 +243,11 @@ HRESULT InitD3D(HWND hWnd)
 
     LPD3DXBUFFER pD3DXMtrlBuffer = NULL;
 
-    if (FAILED(D3DXLoadMeshFromX("cube.x", D3DXMESH_SYSTEMMEM,
+    if (FAILED(D3DXLoadMeshFromX(TEXT("cube.x"), D3DXMESH_SYSTEMMEM,
         g_pd3dDevice, NULL, &pD3DXMtrlBuffer, NULL,
         &dwNumMaterials, &pMesh)))
     {
-        MessageBox(NULL, "Xファイルの読み込みに失敗しました", NULL, MB_OK);
+        MessageBox(NULL, TEXT("Xファイルの読み込みに失敗しました"), NULL, MB_OK);
         return E_FAIL;
     }
     d3dxMaterials = (D3DXMATERIAL*)pD3DXMtrlBuffer->GetBufferPointer();
@@ -256,17 +256,20 @@ HRESULT InitD3D(HWND hWnd)
 
     for (DWORD i = 0; i < dwNumMaterials; i++)
     {
+        int len = MultiByteToWideChar(CP_ACP, 0, d3dxMaterials[i].pTextureFilename, -1, NULL, 0);
+        std::wstring texFilename(len, 0);
+        MultiByteToWideChar(CP_ACP, 0, d3dxMaterials[i].pTextureFilename, -1, &texFilename[0], len);
+
         pMaterials[i] = d3dxMaterials[i].MatD3D;
         pMaterials[i].Ambient = pMaterials[i].Diffuse;
         pTextures[i] = NULL;
-        if (d3dxMaterials[i].pTextureFilename != NULL &&
-            lstrlen(d3dxMaterials[i].pTextureFilename) > 0)
+        if (d3dxMaterials[i].pTextureFilename != NULL && len > 0)
         {
             if (FAILED(D3DXCreateTextureFromFile(g_pd3dDevice,
-                d3dxMaterials[i].pTextureFilename,
-                &pTextures[i])))
+                                                 texFilename.c_str(),
+                                                 &pTextures[i])))
             {
-                MessageBox(NULL, "テクスチャの読み込みに失敗しました", NULL, MB_OK);
+                MessageBox(NULL, TEXT("テクスチャの読み込みに失敗しました"), NULL, MB_OK);
             }
         }
     }
@@ -274,7 +277,7 @@ HRESULT InitD3D(HWND hWnd)
 
     D3DXCreateEffectFromFile(
         g_pd3dDevice,
-        "simple.fx",
+        TEXT("simple.fx"),
         NULL,
         NULL,
         D3DXSHADER_DEBUG,
@@ -284,7 +287,7 @@ HRESULT InitD3D(HWND hWnd)
     );
 
     Sprite* sprCursor = new Sprite(g_pd3dDevice);
-    sprCursor->Load("command_cursor.png");
+    sprCursor->Load(TEXT("command_cursor.png"));
 
     IFont* pFont = new Font(g_pd3dDevice);
 
@@ -292,23 +295,23 @@ HRESULT InitD3D(HWND hWnd)
 
     menu.Init(pFont, pSE, sprCursor, true);
     
-//    menu.UpsertCommand("伐採", true);
-//    menu.UpsertCommand("横になる", true);
-//    menu.UpsertCommand("座る", true);
-//    menu.UpsertCommand("採集", true);
-//    menu.UpsertCommand("加工", false);
-//    menu.UpsertCommand("調理", false);
-//    menu.UpsertCommand("イカダに乗る", true);
-//    menu.UpsertCommand("イカダの袋を見る", true);
-    //menu.UpsertCommand("イカダを漕ぐ", false);
+//    menu.UpsertCommand(TEXT("伐採"), true);
+//    menu.UpsertCommand(TEXT("横になる"), true);
+//    menu.UpsertCommand(TEXT("座る"), true);
+//    menu.UpsertCommand(TEXT("採集"), true);
+//    menu.UpsertCommand(TEXT("加工"), false);
+//    menu.UpsertCommand(TEXT("調理"), false);
+//    menu.UpsertCommand(TEXT("イカダに乗る"), true);
+//    menu.UpsertCommand(TEXT("イカダの袋を見る"), true);
+    //menu.UpsertCommand(TEXT("イカダを漕ぐ"), false);
 
-    menu.UpsertCommand("Logging", true);
-    menu.UpsertCommand("Lie down", true);
-    menu.UpsertCommand("Sit down", true);
-    menu.UpsertCommand("Forage", true);
-    menu.UpsertCommand("Craft", false);
-    menu.UpsertCommand("Cook", false);
-    menu.UpsertCommand("Ride a raft", true);
+    menu.UpsertCommand(TEXT("Logging"), true);
+    menu.UpsertCommand(TEXT("Lie down"), true);
+    menu.UpsertCommand(TEXT("Sit down"), true);
+    menu.UpsertCommand(TEXT("Forage"), true);
+    menu.UpsertCommand(TEXT("Craft"), false);
+    menu.UpsertCommand(TEXT("Cook"), false);
+    menu.UpsertCommand(TEXT("Ride a raft"), true);
 
     return S_OK;
 }
@@ -345,8 +348,8 @@ VOID Render()
 
     if (SUCCEEDED(g_pd3dDevice->BeginScene()))
     {
-        char msg[128];
-        strcpy_s(msg, 128, "Cキーでステータスを表示");
+        wchar_t msg[128];
+        wcscpy_s(msg, 128, TEXT("Cキーでステータスを表示"));
         TextDraw(g_pFont, msg, 0, 0);
 
         pEffect->SetTechnique("BasicTec");
@@ -434,7 +437,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ 
 {
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, MsgProc, 0L, 0L,
                       GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
-                      "Window1", NULL };
+                      TEXT("Window1"), NULL };
     RegisterClassEx(&wc);
 
     RECT rect;
@@ -445,9 +448,17 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ 
     rect.top = 0;
     rect.left = 0;
 
-    HWND hWnd = CreateWindow("Window1", "Hello DirectX9 World !!",
-        WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rect.right, rect.bottom,
-        NULL, NULL, wc.hInstance, NULL);
+    HWND hWnd = CreateWindow(TEXT("Window1"),
+                             TEXT("Hello DirectX9 World !!"),
+                             WS_OVERLAPPEDWINDOW,
+                             CW_USEDEFAULT,
+                             CW_USEDEFAULT,
+                             rect.right,
+                             rect.bottom, 
+                             NULL,
+                             NULL,
+                             wc.hInstance,
+                             NULL);
 
     if (SUCCEEDED(InitD3D(hWnd)))
     {
@@ -462,6 +473,6 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ 
         }
     }
 
-    UnregisterClass("Window1", wc.hInstance);
+    UnregisterClass(TEXT("Window1"), wc.hInstance);
     return 0;
 }

@@ -19,14 +19,14 @@ public:
                            const int y,
                            const int transparency = 255) = 0;
 
-    virtual void Load(const std::string& filepath) = 0;
+    virtual void Load(const std::wstring& filepath) = 0;
     virtual ~ISprite() {};
 };
 
 class IFont
 {
 public:
-    virtual void DrawText_(const std::string& msg,
+    virtual void DrawText_(const std::wstring& msg,
                            const int x,
                            const int y,
                            const int transparent) = 0;
@@ -49,8 +49,8 @@ public:
 class Command
 {
 public:
-    void SetName(const std::string& arg);
-    std::string GetName() const;
+    void SetName(const std::wstring& arg);
+    std::wstring GetName() const;
 
     void SetEnable(const bool arg);
     bool GetEnable() const;
@@ -60,7 +60,7 @@ public:
     int GetLeftPos();
 
 private:
-    std::string m_name;
+    std::wstring m_name;
     bool m_bEnable = false;
 
     int m_top = 0;
@@ -76,10 +76,10 @@ public:
     void Init(IFont* font, ISoundEffect* SE, ISprite* sprCursor, const bool bEnglish);
     void Finalize();
 
-    void UpsertCommand(const std::string& name,
+    void UpsertCommand(const std::wstring& name,
                        const bool enable);
 
-    void RemoveCommand(const std::string& name);
+    void RemoveCommand(const std::wstring& name);
 
     void RemoveAll();
 
@@ -87,9 +87,9 @@ public:
 
     void Previous();
     void Next();
-    std::string Into();
+    std::wstring Into();
     void MouseMove(const int x, const int y);
-    std::string Click(const int x, const int y);
+    std::wstring Click(const int x, const int y);
     
 private:
 
