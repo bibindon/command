@@ -14,7 +14,7 @@
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <string>
-#include <cwchar>
+#include <tchar.h>
 
 using namespace NSCommand;
 
@@ -111,7 +111,7 @@ public:
                                         OUT_TT_ONLY_PRECIS,
                                         ANTIALIASED_QUALITY,
                                         FF_DONTCARE,
-                                        TEXT("游明朝"),
+                                        _T("游明朝"),
                                         &m_pFont);
         }
         else
@@ -126,7 +126,7 @@ public:
                                         OUT_TT_ONLY_PRECIS,
                                         CLEARTYPE_NATURAL_QUALITY,
                                         FF_DONTCARE,
-                                        TEXT("Courier New"),
+                                        _T("Courier New"),
                                         &m_pFont);
         }
     }
@@ -156,15 +156,15 @@ class SoundEffect : public ISoundEffect
 {
     virtual void PlayMove() override
     {
-        PlaySound(TEXT("cursor_move.wav"), NULL, SND_FILENAME | SND_ASYNC);
+        PlaySound(_T("cursor_move.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
     virtual void PlayClick() override
     {
-        PlaySound(TEXT("cursor_confirm.wav"), NULL, SND_FILENAME | SND_ASYNC);
+        PlaySound(_T("cursor_confirm.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
     virtual void PlayBack() override
     {
-        PlaySound(TEXT("cursor_cancel.wav"), NULL, SND_FILENAME | SND_ASYNC);
+        PlaySound(_T("cursor_cancel.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
     virtual void Init() override
     {
@@ -234,7 +234,7 @@ HRESULT InitD3D(HWND hWnd)
         OUT_TT_ONLY_PRECIS,
         ANTIALIASED_QUALITY,
         FF_DONTCARE,
-        TEXT("ＭＳ ゴシック"),
+        _T("ＭＳ ゴシック"),
         &g_pFont);
     if FAILED(hr)
     {
@@ -243,11 +243,11 @@ HRESULT InitD3D(HWND hWnd)
 
     LPD3DXBUFFER pD3DXMtrlBuffer = NULL;
 
-    if (FAILED(D3DXLoadMeshFromX(TEXT("cube.x"), D3DXMESH_SYSTEMMEM,
+    if (FAILED(D3DXLoadMeshFromX(_T("cube.x"), D3DXMESH_SYSTEMMEM,
         g_pd3dDevice, NULL, &pD3DXMtrlBuffer, NULL,
         &dwNumMaterials, &pMesh)))
     {
-        MessageBox(NULL, TEXT("Xファイルの読み込みに失敗しました"), NULL, MB_OK);
+        MessageBox(NULL, _T("Xファイルの読み込みに失敗しました"), NULL, MB_OK);
         return E_FAIL;
     }
     d3dxMaterials = (D3DXMATERIAL*)pD3DXMtrlBuffer->GetBufferPointer();
@@ -269,7 +269,7 @@ HRESULT InitD3D(HWND hWnd)
                                                  texFilename.c_str(),
                                                  &pTextures[i])))
             {
-                MessageBox(NULL, TEXT("テクスチャの読み込みに失敗しました"), NULL, MB_OK);
+                MessageBox(NULL, _T("テクスチャの読み込みに失敗しました"), NULL, MB_OK);
             }
         }
     }
@@ -277,7 +277,7 @@ HRESULT InitD3D(HWND hWnd)
 
     D3DXCreateEffectFromFile(
         g_pd3dDevice,
-        TEXT("simple.fx"),
+        _T("simple.fx"),
         NULL,
         NULL,
         D3DXSHADER_DEBUG,
@@ -287,7 +287,7 @@ HRESULT InitD3D(HWND hWnd)
     );
 
     Sprite* sprCursor = new Sprite(g_pd3dDevice);
-    sprCursor->Load(TEXT("command_cursor.png"));
+    sprCursor->Load(_T("command_cursor.png"));
 
     IFont* pFont = new Font(g_pd3dDevice);
 
@@ -295,23 +295,23 @@ HRESULT InitD3D(HWND hWnd)
 
     menu.Init(pFont, pSE, sprCursor, true);
     
-//    menu.UpsertCommand(TEXT("伐採"), true);
-//    menu.UpsertCommand(TEXT("横になる"), true);
-//    menu.UpsertCommand(TEXT("座る"), true);
-//    menu.UpsertCommand(TEXT("採集"), true);
-//    menu.UpsertCommand(TEXT("加工"), false);
-//    menu.UpsertCommand(TEXT("調理"), false);
-//    menu.UpsertCommand(TEXT("イカダに乗る"), true);
-//    menu.UpsertCommand(TEXT("イカダの袋を見る"), true);
-    //menu.UpsertCommand(TEXT("イカダを漕ぐ"), false);
+//    menu.UpsertCommand(_T("伐採"), true);
+//    menu.UpsertCommand(_T("横になる"), true);
+//    menu.UpsertCommand(_T("座る"), true);
+//    menu.UpsertCommand(_T("採集"), true);
+//    menu.UpsertCommand(_T("加工"), false);
+//    menu.UpsertCommand(_T("調理"), false);
+//    menu.UpsertCommand(_T("イカダに乗る"), true);
+//    menu.UpsertCommand(_T("イカダの袋を見る"), true);
+    //menu.UpsertCommand(_T("イカダを漕ぐ"), false);
 
-    menu.UpsertCommand(TEXT("Logging"), true);
-    menu.UpsertCommand(TEXT("Lie down"), true);
-    menu.UpsertCommand(TEXT("Sit down"), true);
-    menu.UpsertCommand(TEXT("Forage"), true);
-    menu.UpsertCommand(TEXT("Craft"), false);
-    menu.UpsertCommand(TEXT("Cook"), false);
-    menu.UpsertCommand(TEXT("Ride a raft"), true);
+    menu.UpsertCommand(_T("Logging"), true);
+    menu.UpsertCommand(_T("Lie down"), true);
+    menu.UpsertCommand(_T("Sit down"), true);
+    menu.UpsertCommand(_T("Forage"), true);
+    menu.UpsertCommand(_T("Craft"), false);
+    menu.UpsertCommand(_T("Cook"), false);
+    menu.UpsertCommand(_T("Ride a raft"), true);
 
     return S_OK;
 }
@@ -349,7 +349,7 @@ VOID Render()
     if (SUCCEEDED(g_pd3dDevice->BeginScene()))
     {
         wchar_t msg[128];
-        wcscpy_s(msg, 128, TEXT("Cキーでステータスを表示"));
+        wcscpy_s(msg, 128, _T("Cキーでステータスを表示"));
         TextDraw(g_pFont, msg, 0, 0);
 
         pEffect->SetTechnique("BasicTec");
@@ -437,7 +437,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ 
 {
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, MsgProc, 0L, 0L,
                       GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
-                      TEXT("Window1"), NULL };
+                      _T("Window1"), NULL };
     RegisterClassEx(&wc);
 
     RECT rect;
@@ -448,8 +448,8 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ 
     rect.top = 0;
     rect.left = 0;
 
-    HWND hWnd = CreateWindow(TEXT("Window1"),
-                             TEXT("Hello DirectX9 World !!"),
+    HWND hWnd = CreateWindow(_T("Window1"),
+                             _T("Hello DirectX9 World !!"),
                              WS_OVERLAPPEDWINDOW,
                              CW_USEDEFAULT,
                              CW_USEDEFAULT,
@@ -473,6 +473,6 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ 
         }
     }
 
-    UnregisterClass(TEXT("Window1"), wc.hInstance);
+    UnregisterClass(_T("Window1"), wc.hInstance);
     return 0;
 }
