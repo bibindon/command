@@ -1,15 +1,15 @@
-// ��ʂɃX�e�[�^�X����\������B
-// ���b�N�}���̗̑̓o�[�̂悤�Ȃ���
-// hud�Ƃ������O�͗ǂ��Ȃ������C�����邪�ς����Ȃ��̂ł��̂܂܂Ƃ���
+﻿// 画面にステータス情報を表示する。
+// ロックマンの体力バーのようなもの
+// hudという名前は良くなかった気がするが変えられないのでそのままとする
 
 #pragma once
 #include <string>
 #include <vector>
 #include <unordered_map>
 
-// �A�C�e�������E��2��ŕ\������
-// �����C���x���g���A�E���q��
-// �N���b�N������E�����Ɉړ�����B�m�F�͍s��Ȃ��B
+// アイテムを左右の2列で表示する
+// 左がインベントリ、右が倉庫
+// クリックしたら右か左に移動する。確認は行わない。
 namespace NSCommand
 {
 class ISprite

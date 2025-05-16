@@ -1,4 +1,4 @@
-#include "command.h"
+ï»¿#include "command.h"
 #include <sstream>
 #include <algorithm>
 
@@ -79,8 +79,8 @@ void NSCommand::CommandLib::RemoveAll()
 
 void CommandLib::Draw()
 {
-    // ‚à‚µA‘I‘ğ•s‰Â”\‚ÈƒRƒ}ƒ“ƒhã‚ÉƒJ[ƒ\ƒ‹‚ª‚ ‚Á‚½‚çA
-    // ‘I‘ğ‰Â”\‚ÈƒRƒ}ƒ“ƒhã‚ÉƒJ[ƒ\ƒ‹‚ğˆÚ“®‚³‚¹‚éB
+    // ã‚‚ã—ã€é¸æŠä¸å¯èƒ½ãªã‚³ãƒãƒ³ãƒ‰ä¸Šã«ã‚«ãƒ¼ã‚½ãƒ«ãŒã‚ã£ãŸã‚‰ã€
+    // é¸æŠå¯èƒ½ãªã‚³ãƒãƒ³ãƒ‰ä¸Šã«ã‚«ãƒ¼ã‚½ãƒ«ã‚’ç§»å‹•ã•ã›ã‚‹ã€‚
 
     if (m_commandList.size() <= m_cursorIndex ||
         !m_commandList.at(m_cursorIndex).GetEnable())
@@ -106,14 +106,14 @@ void CommandLib::Draw()
         }
     }
 
-    // ƒRƒ}ƒ“ƒh‚ğ’†‰›‘µ‚¦‚Å•\¦‚·‚é
+    // ã‚³ãƒãƒ³ãƒ‰ã‚’ä¸­å¤®æƒãˆã§è¡¨ç¤ºã™ã‚‹
     for (int i = 0; i < (int)m_commandList.size(); ++i)
     {
         bool enable = m_commandList.at(i).GetEnable();
-        // ‘I‘ğ‰Â”\ƒRƒ}ƒ“ƒh
+        // é¸æŠå¯èƒ½ã‚³ãƒãƒ³ãƒ‰
         if (enable)
         {
-            // ‘I‘ğ’†ƒRƒ}ƒ“ƒh
+            // é¸æŠä¸­ã‚³ãƒãƒ³ãƒ‰
             if (m_cursorIndex == i)
             {
                 m_font->DrawText_(m_commandList.at(i).GetName(),
@@ -121,7 +121,7 @@ void CommandLib::Draw()
                                   STARTY,
                                   255);
             }
-            // –¢‘I‘ğƒRƒ}ƒ“ƒh
+            // æœªé¸æŠã‚³ãƒãƒ³ãƒ‰
             else
             {
                 m_font->DrawText_(m_commandList.at(i).GetName(),
@@ -130,7 +130,7 @@ void CommandLib::Draw()
                                   128);
             }
         }
-        // g—p•s‰ÂƒRƒ}ƒ“ƒh
+        // ä½¿ç”¨ä¸å¯ã‚³ãƒãƒ³ãƒ‰
         else
         {
             m_font->DrawText_(m_commandList.at(i).GetName(),
@@ -139,12 +139,12 @@ void CommandLib::Draw()
                               64);
         }
 
-        // ƒJ[ƒ\ƒ‹‚Ì•\¦
+        // ã‚«ãƒ¼ã‚½ãƒ«ã®è¡¨ç¤º
         if (m_cursorIndex == i)
         {
             int x = 0;
             x = m_commandList.at(i).GetLeftPos();
-            // 100/2ƒsƒNƒZƒ‹‰E‚É‚¸‚ç‚·BŠÛ‚Ì”¼Œa‚ª10ƒsƒNƒZƒ‹‚­‚ç‚¢‚È‚Ì‚Å­‚µ¶‚É–ß‚·B
+            // 100/2ãƒ”ã‚¯ã‚»ãƒ«å³ã«ãšã‚‰ã™ã€‚ä¸¸ã®åŠå¾„ãŒ10ãƒ”ã‚¯ã‚»ãƒ«ãã‚‰ã„ãªã®ã§å°‘ã—å·¦ã«æˆ»ã™ã€‚
             x += (COMMAND_WIDTH / 2) - 5;
             m_sprCursor->DrawImage(x, STARTY + CURSOR_PADDING_Y);
         }
@@ -293,7 +293,7 @@ std::string NSCommand::CommandLib::Click(const int x, const int y)
 
 void NSCommand::CommandLib::ResetRect()
 {
-    // Šï”‚Ìê‡
+    // å¥‡æ•°ã®å ´åˆ
     if (m_commandList.size() % 2 == 1)
     {
         for (int i = 0; i < (int)m_commandList.size(); ++i)
@@ -313,7 +313,7 @@ void NSCommand::CommandLib::ResetRect()
             m_commandList.at(i).SetRect(top, left, bottom, right);
         }
     }
-    // ‹ô”‚Ìê‡
+    // å¶æ•°ã®å ´åˆ
     else
     {
         for (int i = 0; i < (int)m_commandList.size(); ++i)
