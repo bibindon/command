@@ -293,25 +293,16 @@ HRESULT InitD3D(HWND hWnd)
 
     ISoundEffect* pSE = new SoundEffect();
 
-    menu.Init(pFont, pSE, sprCursor, true);
+    menu.Init(pFont, pSE, sprCursor, true, L"commandName.csv");
     
-//    menu.UpsertCommand(_T("伐採"), true);
-//    menu.UpsertCommand(_T("横になる"), true);
-//    menu.UpsertCommand(_T("座る"), true);
-//    menu.UpsertCommand(_T("採集"), true);
-//    menu.UpsertCommand(_T("加工"), false);
-//    menu.UpsertCommand(_T("調理"), false);
-//    menu.UpsertCommand(_T("イカダに乗る"), true);
-//    menu.UpsertCommand(_T("イカダの袋を見る"), true);
-    //menu.UpsertCommand(_T("イカダを漕ぐ"), false);
-
-    menu.UpsertCommand(_T("Logging"), true);
-    menu.UpsertCommand(_T("Lie down"), true);
-    menu.UpsertCommand(_T("Sit down"), true);
-    menu.UpsertCommand(_T("Forage"), true);
-    menu.UpsertCommand(_T("Craft"), false);
-    menu.UpsertCommand(_T("Cook"), false);
-    menu.UpsertCommand(_T("Ride a raft"), true);
+    menu.UpsertCommand(L"cutTree", true);
+    menu.UpsertCommand(L"pickPlant", true);
+    menu.UpsertCommand(L"rest3Hours", true);
+    menu.UpsertCommand(L"lieDown", true);
+    menu.UpsertCommand(L"sit", true);
+    menu.UpsertCommand(L"escape", true);
+    menu.UpsertCommand(L"craft", true);
+    menu.UpsertCommand(L"patchTest", true);
 
     return S_OK;
 }

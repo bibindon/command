@@ -49,6 +49,9 @@ public:
 class Command
 {
 public:
+    void SetId(const std::wstring& arg) { m_id = arg; }
+    std::wstring GetId() const { return m_id; }
+
     void SetName(const std::wstring& arg);
     std::wstring GetName() const;
 
@@ -60,6 +63,7 @@ public:
     int GetLeftPos();
 
 private:
+    std::wstring m_id;
     std::wstring m_name;
     bool m_bEnable = false;
 
@@ -73,13 +77,15 @@ class CommandLib
 {
 public:
 
-    void Init(IFont* font, ISoundEffect* SE, ISprite* sprCursor, const bool bEnglish);
+    void Init(IFont* font, ISoundEffect* SE, ISprite* sprCursor, const bool bEnglish,
+              const std::wstring csvfile);
+
     void Finalize();
 
-    void UpsertCommand(const std::wstring& name,
+    void UpsertCommand(const std::wstring& id,
                        const bool enable);
 
-    void RemoveCommand(const std::wstring& name);
+    void RemoveCommand(const std::wstring& id);
 
     void RemoveAll();
 
@@ -95,11 +101,13 @@ private:
 
     void ResetRect();
 
-    ISprite* m_sprCursor;
-    IFont* m_font;
-    ISoundEffect* m_SE;
+    ISprite* m_sprCursor = NULL;
+    IFont* m_font = NULL;
+    ISoundEffect* m_SE = NULL;
 
     std::vector<Command> m_commandList;
+
+    std::unordered_map<std::wstring, std::wstring> m_nameMap;
 
     const int CENTERX = 750;
     const int STARTY = 800;

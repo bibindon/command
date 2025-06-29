@@ -1,6 +1,9 @@
 ﻿#include "command.h"
+
 #include <sstream>
 #include <algorithm>
+
+#include "HeaderOnlyCsv.hpp"
 
 using namespace NSCommand;
 
@@ -18,7 +21,8 @@ static std::vector<std::wstring> split(const std::wstring& s, wchar_t delim)
     return result;
 }
 
-void CommandLib::Init(IFont* font, ISoundEffect* pSE, ISprite* sprCursor, const bool bEnglish)
+void CommandLib::Init(IFont* font, ISoundEffect* pSE, ISprite* sprCursor, const bool bEnglish,
+                      const std::wstring csvfile)
 {
     m_font = font;
     m_SE = pSE;
@@ -26,6 +30,14 @@ void CommandLib::Init(IFont* font, ISoundEffect* pSE, ISprite* sprCursor, const 
 
     m_font->Init(bEnglish);
     m_SE->Init();
+
+    auto vvws = csv::Read(csvfile);
+    vvws.erase(vvws.begin());
+
+    for (auto& ws : vvws)
+    {
+        m_nameMap[ws.at(0)] = ws.at(1);
+    }
 }
 
 void NSCommand::CommandLib::Finalize()
@@ -35,12 +47,13 @@ void NSCommand::CommandLib::Finalize()
     delete m_sprCursor;
 }
 
-void NSCommand::CommandLib::UpsertCommand(const std::wstring& name, const bool enable)
+void NSCommand::CommandLib::UpsertCommand(const std::wstring& id,
+                                          const bool enable)
 {
     auto result = std::find_if(m_commandList.begin(), m_commandList.end(),
                                [&](const Command& x)
                                {
-                                   return x.GetName() == name;
+                                   return x.GetId() == id;
                                });
 
     if (result != m_commandList.end())
@@ -50,7 +63,8 @@ void NSCommand::CommandLib::UpsertCommand(const std::wstring& name, const bool e
     else
     {
         Command command;
-        command.SetName(name);
+        command.SetId(id);
+        command.SetName(m_nameMap.at(id));
         command.SetEnable(enable);
 
         m_commandList.push_back(command);
@@ -59,12 +73,12 @@ void NSCommand::CommandLib::UpsertCommand(const std::wstring& name, const bool e
     ResetRect();
 }
 
-void NSCommand::CommandLib::RemoveCommand(const std::wstring& name)
+void NSCommand::CommandLib::RemoveCommand(const std::wstring& id)
 {
     auto result = std::remove_if(m_commandList.begin(), m_commandList.end(),
                                  [&](const Command& x)
                                  {
-                                     return x.GetName() == name;
+                                     return x.GetId() == id;
                                  });
 
     m_commandList.erase(result, m_commandList.end());
@@ -218,7 +232,7 @@ void NSCommand::CommandLib::Next()
 std::wstring NSCommand::CommandLib::Into()
 {
     m_SE->PlayClick();
-    return m_commandList.at(m_cursorIndex).GetName();
+    return m_commandList.at(m_cursorIndex).GetId();
 }
 
 void NSCommand::CommandLib::MouseMove(const int x, const int y)
@@ -287,7 +301,7 @@ std::wstring NSCommand::CommandLib::Click(const int x, const int y)
     }
     else
     {
-        return m_commandList.at(m_cursorIndex).GetName();
+        return m_commandList.at(m_cursorIndex).GetId();
     }
 }
 
