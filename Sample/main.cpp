@@ -102,31 +102,31 @@ public:
         if (!bEnglish)
         {
             HRESULT hr = D3DXCreateFont(m_pD3DDevice,
-                                        20,
+                                        18,
                                         0,
-                                        FW_THIN,
-                                        1,
-                                        false,
-                                        SHIFTJIS_CHARSET,
-                                        OUT_TT_ONLY_PRECIS,
-                                        ANTIALIASED_QUALITY,
-                                        FF_DONTCARE,
-                                        _T("游明朝"),
-                                        &m_pFont);
-        }
-        else
-        {
-            HRESULT hr = D3DXCreateFont(m_pD3DDevice,
-                                        20,
-                                        0,
-                                        FW_THIN,
+                                        FW_NORMAL,
                                         1,
                                         false,
                                         DEFAULT_CHARSET,
                                         OUT_TT_ONLY_PRECIS,
                                         CLEARTYPE_NATURAL_QUALITY,
                                         FF_DONTCARE,
-                                        _T("Courier New"),
+                                        _T("BIZ UDMincho Medium"),
+                                        &m_pFont);
+        }
+        else
+        {
+            HRESULT hr = D3DXCreateFont(m_pD3DDevice,
+                                        18,
+                                        0,
+                                        FW_NORMAL,
+                                        1,
+                                        false,
+                                        DEFAULT_CHARSET,
+                                        OUT_TT_ONLY_PRECIS,
+                                        CLEARTYPE_NATURAL_QUALITY,
+                                        FF_DONTCARE,
+                                        _T("Calibri"),
                                         &m_pFont);
         }
     }
@@ -223,19 +223,18 @@ HRESULT InitD3D(HWND hWnd)
         }
     }
 
-    HRESULT hr = D3DXCreateFont(
-        g_pd3dDevice,
-        20,
-        0,
-        FW_HEAVY,
-        1,
-        false,
-        SHIFTJIS_CHARSET,
-        OUT_TT_ONLY_PRECIS,
-        ANTIALIASED_QUALITY,
-        FF_DONTCARE,
-        _T("ＭＳ ゴシック"),
-        &g_pFont);
+    HRESULT hr = D3DXCreateFont(g_pd3dDevice,
+                                20,
+                                0,
+                                FW_HEAVY,
+                                1,
+                                false,
+                                SHIFTJIS_CHARSET,
+                                OUT_TT_ONLY_PRECIS,
+                                ANTIALIASED_QUALITY,
+                                FF_DONTCARE,
+                                _T("BIZ UDMincho"),
+                                &g_pFont);
     if FAILED(hr)
     {
         return(E_FAIL);
@@ -293,7 +292,9 @@ HRESULT InitD3D(HWND hWnd)
 
     ISoundEffect* pSE = new SoundEffect();
 
-    menu.Init(pFont, pSE, sprCursor, true, L"commandName.csv");
+    bool bEnglish = false;
+
+    menu.Init(pFont, pSE, sprCursor, bEnglish, L"commandName.csv");
     
     menu.UpsertCommand(L"cutTree", true);
     menu.UpsertCommand(L"pickPlant", true);
