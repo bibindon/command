@@ -9,12 +9,27 @@
 
 #pragma comment( lib, "command.lib")
 
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+struct LeakChecker
+{
+    LeakChecker()
+    {
+        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    }
+} _leakChecker;
+
+#endif
+
 #include "..\command\command.h"
 
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <string>
 #include <tchar.h>
+#include <atlbase.h>
+#include <memory>
 
 using namespace NSCommand;
 
@@ -75,20 +90,18 @@ public:
 
     ~Sprite()
     {
-        m_D3DSprite->Release();
-        m_pD3DTexture->Release();
     }
 
 private:
 
-    LPDIRECT3DDEVICE9 m_pD3DDevice = NULL;
-    LPD3DXSPRITE m_D3DSprite = NULL;
-    LPDIRECT3DTEXTURE9 m_pD3DTexture = NULL;
+    CComPtr<IDirect3DDevice9> m_pD3DDevice = NULL;
+    CComPtr<ID3DXSprite> m_D3DSprite = NULL;
+    CComPtr<IDirect3DTexture9> m_pD3DTexture = NULL;
     UINT m_width { 0 };
     UINT m_height { 0 };
 };
 
-class Font : public IFont
+class Font : public NSCommand::IFont
 {
 public:
 
@@ -143,13 +156,12 @@ public:
 
     ~Font()
     {
-        m_pFont->Release();
     }
 
 private:
 
-    LPDIRECT3DDEVICE9 m_pD3DDevice = NULL;
-    LPD3DXFONT m_pFont = NULL;
+    CComPtr<IDirect3DDevice9> m_pD3DDevice = NULL;
+    CComPtr<ID3DXFont> m_pFont = NULL;
 };
 
 class SoundEffect : public ISoundEffect
@@ -172,15 +184,13 @@ class SoundEffect : public ISoundEffect
     }
 };
 
-
-LPDIRECT3D9 g_pD3D = NULL;
-LPDIRECT3DDEVICE9 g_pd3dDevice = NULL;
-LPD3DXFONT g_pFont = NULL;
-LPD3DXMESH pMesh = NULL;
-D3DMATERIAL9* pMaterials = NULL;
-LPDIRECT3DTEXTURE9* pTextures = NULL;
+CComPtr<IDirect3D9> g_pD3D = NULL;
+CComPtr<IDirect3DDevice9> g_pd3dDevice = NULL;
+CComPtr<ID3DXFont> g_pFont = NULL;
+CComPtr<ID3DXMesh> pMesh = NULL;
+std::vector<CComPtr<IDirect3DTexture9>> pTextures;
 DWORD dwNumMaterials = 0;
-LPD3DXEFFECT pEffect = NULL;
+CComPtr<ID3DXEffect> pEffect = NULL;
 D3DXMATERIAL* d3dxMaterials = NULL;
 float f = 0.0f;
 bool bShowMenu = true;
@@ -226,14 +236,14 @@ HRESULT InitD3D(HWND hWnd)
     HRESULT hr = D3DXCreateFont(g_pd3dDevice,
                                 20,
                                 0,
-                                FW_HEAVY,
+                                FW_NORMAL,
                                 1,
                                 false,
                                 SHIFTJIS_CHARSET,
                                 OUT_TT_ONLY_PRECIS,
                                 ANTIALIASED_QUALITY,
                                 FF_DONTCARE,
-                                _T("BIZ UDMincho"),
+                                _T("BIZ UDMincho Medium"),
                                 &g_pFont);
     if FAILED(hr)
     {
@@ -249,9 +259,11 @@ HRESULT InitD3D(HWND hWnd)
         MessageBox(NULL, _T("Xファイルの読み込みに失敗しました"), NULL, MB_OK);
         return E_FAIL;
     }
+
     d3dxMaterials = (D3DXMATERIAL*)pD3DXMtrlBuffer->GetBufferPointer();
-    pMaterials = new D3DMATERIAL9[dwNumMaterials];
-    pTextures = new LPDIRECT3DTEXTURE9[dwNumMaterials];
+
+    std::vector<D3DMATERIAL9> pMaterials(dwNumMaterials);
+    pTextures.resize(dwNumMaterials);
 
     for (DWORD i = 0; i < dwNumMaterials; i++)
     {
@@ -288,7 +300,7 @@ HRESULT InitD3D(HWND hWnd)
     Sprite* sprCursor = new Sprite(g_pd3dDevice);
     sprCursor->Load(_T("command_cursor.png"));
 
-    IFont* pFont = new Font(g_pd3dDevice);
+    NSCommand::IFont* pFont = new Font(g_pd3dDevice);
 
     ISoundEffect* pSE = new SoundEffect();
 
@@ -310,10 +322,7 @@ HRESULT InitD3D(HWND hWnd)
 
 VOID Cleanup()
 {
-    SAFE_RELEASE(pMesh);
-    SAFE_RELEASE(g_pFont);
-    SAFE_RELEASE(g_pd3dDevice);
-    SAFE_RELEASE(g_pD3D);
+    menu.Finalize();
 }
 
 VOID Render()
@@ -357,6 +366,7 @@ VOID Render()
         {
             menu.Draw();
         }
+        pEffect->CommitChanges();
         pEffect->EndPass();
         pEffect->End();
         g_pd3dDevice->EndScene();
@@ -404,6 +414,7 @@ LRESULT WINAPI MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         }
         case VK_ESCAPE:
+            Cleanup();
             PostQuitMessage(0);
             break;
         }
