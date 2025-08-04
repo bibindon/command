@@ -33,8 +33,6 @@ struct LeakChecker
 
 using namespace NSCommand;
 
-#define SAFE_RELEASE(p) { if (p) { (p)->Release(); (p) = NULL; } }
-
 class Sprite : public ISprite
 {
 public:
@@ -47,26 +45,22 @@ public:
     void DrawImage(const int x, const int y, const int transparency) override
     {
         D3DXVECTOR3 pos {(float)x, (float)y, 0.f};
-        m_D3DSprite->Begin(D3DXSPRITE_ALPHABLEND);
-        RECT rect = {
-            0,
-            0,
-            static_cast<LONG>(m_width),
-            static_cast<LONG>(m_height) };
+        RECT rect = { 0, 0, (LONG)m_width, (LONG)m_height }; 
         D3DXVECTOR3 center { 0, 0, 0 };
-        m_D3DSprite->Draw(
-            m_pD3DTexture,
-            &rect,
-            &center,
-            &pos,
-            D3DCOLOR_ARGB(transparency, 255, 255, 255));
+
+        m_D3DSprite->Begin(D3DXSPRITE_ALPHABLEND);
+        m_D3DSprite->Draw(m_pD3DTexture,
+                          &rect,
+                          &center,
+                          &pos,
+                          D3DCOLOR_ARGB(transparency, 255, 255, 255));
+
         m_D3DSprite->End();
 
     }
 
     void Load(const std::wstring& filepath) override
     {
-        LPD3DXSPRITE tempSprite { nullptr };
         if (FAILED(D3DXCreateSprite(m_pD3DDevice, &m_D3DSprite)))
         {
             throw std::exception("Failed to create a sprite.");
@@ -84,6 +78,7 @@ public:
         {
             throw std::exception("Failed to create a texture.");
         }
+
         m_width = desc.Width;
         m_height = desc.Height;
     }
@@ -94,11 +89,11 @@ public:
 
 private:
 
-    CComPtr<IDirect3DDevice9> m_pD3DDevice = NULL;
-    CComPtr<ID3DXSprite> m_D3DSprite = NULL;
-    CComPtr<IDirect3DTexture9> m_pD3DTexture = NULL;
-    UINT m_width { 0 };
-    UINT m_height { 0 };
+    CComPtr<IDirect3DDevice9> m_pD3DDevice;
+    CComPtr<ID3DXSprite> m_D3DSprite;
+    CComPtr<IDirect3DTexture9> m_pD3DTexture;
+    UINT m_width = 0;
+    UINT m_height = 0;
 };
 
 class Font : public NSCommand::IFont
@@ -150,8 +145,13 @@ public:
                            const int transparent)
     {
         RECT rect = { x, y, x + 100, y + 100 };
-        m_pFont->DrawText(NULL, msg.c_str(), -1, &rect, DT_CENTER | DT_VCENTER | DT_NOCLIP,
-            D3DCOLOR_ARGB(transparent, 255, 255, 255));
+
+        m_pFont->DrawText(NULL,
+                          msg.c_str(),
+                          -1,
+                          &rect,
+                          DT_CENTER | DT_VCENTER | DT_NOCLIP,
+                          D3DCOLOR_ARGB(transparent, 255, 255, 255));
     }
 
     ~Font()
@@ -160,8 +160,8 @@ public:
 
 private:
 
-    CComPtr<IDirect3DDevice9> m_pD3DDevice = NULL;
-    CComPtr<ID3DXFont> m_pFont = NULL;
+    CComPtr<IDirect3DDevice9> m_pD3DDevice;
+    CComPtr<ID3DXFont> m_pFont;
 };
 
 class SoundEffect : public ISoundEffect
@@ -170,40 +170,43 @@ class SoundEffect : public ISoundEffect
     {
         PlaySound(_T("cursor_move.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
+
     virtual void PlayClick() override
     {
         PlaySound(_T("cursor_confirm.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
+
     virtual void PlayBack() override
     {
         PlaySound(_T("cursor_cancel.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
+
     virtual void Init() override
     {
 
     }
 };
 
-CComPtr<IDirect3D9> g_pD3D = NULL;
-CComPtr<IDirect3DDevice9> g_pd3dDevice = NULL;
-CComPtr<ID3DXFont> g_pFont = NULL;
-CComPtr<ID3DXMesh> pMesh = NULL;
+CComPtr<IDirect3D9> g_pD3D;
+CComPtr<IDirect3DDevice9> g_pd3dDevice;
+CComPtr<ID3DXFont> g_pFont;
+CComPtr<ID3DXMesh> pMesh;
 std::vector<CComPtr<IDirect3DTexture9>> pTextures;
 DWORD dwNumMaterials = 0;
-CComPtr<ID3DXEffect> pEffect = NULL;
-D3DXMATERIAL* d3dxMaterials = NULL;
+CComPtr<ID3DXEffect> pEffect;
+D3DXMATERIAL* d3dxMaterials;
 float f = 0.0f;
 bool bShowMenu = true;
 
 CommandLib menu;
 
-void TextDraw(LPD3DXFONT pFont, wchar_t* text, int X, int Y)
+static void TextDraw(LPD3DXFONT pFont, wchar_t* text, int X, int Y)
 {
     RECT rect = { X,Y,0,0 };
     pFont->DrawText(NULL, text, -1, &rect, DT_LEFT | DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 0));
 }
 
-HRESULT InitD3D(HWND hWnd)
+static HRESULT InitD3D(HWND hWnd)
 {
     if (NULL == (g_pD3D = Direct3DCreate9(D3D_SDK_VERSION)))
     {
@@ -320,12 +323,12 @@ HRESULT InitD3D(HWND hWnd)
     return S_OK;
 }
 
-VOID Cleanup()
+static VOID Cleanup()
 {
     menu.Finalize();
 }
 
-VOID Render()
+static VOID Render()
 {
     if (NULL == g_pd3dDevice)
     {
@@ -344,8 +347,12 @@ VOID Render()
     mat = mat * View * Proj;
     pEffect->SetMatrix("matWorldViewProj", &mat);
 
-    g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
-        D3DCOLOR_XRGB(70, 50, 30), 1.0f, 0);
+    g_pd3dDevice->Clear(0,
+                        NULL,
+                        D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
+                        D3DCOLOR_XRGB(70, 50, 30),
+                        1.0f,
+                        0);
 
     if (SUCCEEDED(g_pd3dDevice->BeginScene()))
     {
@@ -469,10 +476,24 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ 
         UpdateWindow(hWnd);
 
         MSG msg;
-        while (GetMessage(&msg, NULL, 0, 0))
+
+        while (true)
         {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            auto peekResult = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+            if (peekResult == TRUE)
+            {
+                if (msg.message == WM_QUIT)
+                {
+                    break;
+                }
+
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+            else
+            {
+                Render();
+            }
         }
     }
 
