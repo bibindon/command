@@ -10,9 +10,9 @@
 #pragma comment( lib, "command.lib")
 
 #ifdef _DEBUG
-#define D3D_DEBUG_INFO 
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
+    #define D3D_DEBUG_INFO 
+    #define _CRTDBG_MAP_ALLOC
+    #include <crtdbg.h>
 struct LeakChecker
 {
     LeakChecker()
@@ -31,6 +31,11 @@ struct LeakChecker
 #include <tchar.h>
 #include <atlbase.h>
 #include <memory>
+
+#ifdef _DEBUG
+    #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+    #define new DBG_NEW
+#endif
 
 using namespace NSCommand;
 
@@ -92,7 +97,6 @@ private:
 
     CComPtr<IDirect3DDevice9> m_pD3DDevice;
     CComPtr<ID3DXSprite> m_D3DSprite;
-//    ID3DXSprite* m_D3DSprite = NULL;
     CComPtr<IDirect3DTexture9> m_pD3DTexture;
     UINT m_width = 0;
     UINT m_height = 0;
@@ -192,16 +196,15 @@ class SoundEffect : public ISoundEffect
 CComPtr<IDirect3D9> g_pD3D;
 CComPtr<IDirect3DDevice9> g_pd3dDevice;
 CComPtr<ID3DXFont> g_pFont;
-//CComPtr<ID3DXMesh> pMesh;
-ID3DXMesh* pMesh = NULL;
-std::vector<CComPtr<IDirect3DTexture9>> pTextures;
+CComPtr<ID3DXMesh> g_pMesh;
+std::vector<CComPtr<IDirect3DTexture9>>* g_pTextures;
 DWORD dwNumMaterials = 0;
-CComPtr<ID3DXEffect> pEffect;
+CComPtr<ID3DXEffect> g_pEffect;
 D3DXMATERIAL* d3dxMaterials;
 float f = 0.0f;
 bool bShowMenu = true;
 
-CommandLib menu;
+std::unique_ptr<CommandLib> g_command;
 
 static void TextDraw(LPD3DXFONT pFont, wchar_t* text, int X, int Y)
 {
@@ -258,9 +261,14 @@ static HRESULT InitD3D(HWND hWnd)
 
     LPD3DXBUFFER pD3DXMtrlBuffer = NULL;
 
-    if (FAILED(D3DXLoadMeshFromX(_T("cube.x"), D3DXMESH_SYSTEMMEM,
-        g_pd3dDevice, NULL, &pD3DXMtrlBuffer, NULL,
-        &dwNumMaterials, &pMesh)))
+    if (FAILED(D3DXLoadMeshFromX(_T("cube.x"),
+                                 D3DXMESH_SYSTEMMEM,
+                                 g_pd3dDevice,
+                                 NULL,
+                                 &pD3DXMtrlBuffer,
+                                 NULL,
+                                 &dwNumMaterials,
+                                 &g_pMesh)))
     {
         MessageBox(NULL, _T("Xファイルの読み込みに失敗しました"), NULL, MB_OK);
         return E_FAIL;
@@ -269,7 +277,8 @@ static HRESULT InitD3D(HWND hWnd)
     d3dxMaterials = (D3DXMATERIAL*)pD3DXMtrlBuffer->GetBufferPointer();
 
     std::vector<D3DMATERIAL9> pMaterials(dwNumMaterials);
-    pTextures.resize(dwNumMaterials);
+    g_pTextures = new std::vector<CComPtr<IDirect3DTexture9>>();
+    g_pTextures->resize(dwNumMaterials);
 
     for (DWORD i = 0; i < dwNumMaterials; i++)
     {
@@ -279,12 +288,12 @@ static HRESULT InitD3D(HWND hWnd)
 
         pMaterials[i] = d3dxMaterials[i].MatD3D;
         pMaterials[i].Ambient = pMaterials[i].Diffuse;
-        pTextures[i] = NULL;
+        g_pTextures->at(i) = NULL;
         if (d3dxMaterials[i].pTextureFilename != NULL && len > 0)
         {
             if (FAILED(D3DXCreateTextureFromFile(g_pd3dDevice,
                                                  texFilename.c_str(),
-                                                 &pTextures[i])))
+                                                 &g_pTextures->at(i))))
             {
                 MessageBox(NULL, _T("テクスチャの読み込みに失敗しました"), NULL, MB_OK);
             }
@@ -292,16 +301,14 @@ static HRESULT InitD3D(HWND hWnd)
     }
     pD3DXMtrlBuffer->Release();
 
-    D3DXCreateEffectFromFile(
-        g_pd3dDevice,
-        _T("simple.fx"),
-        NULL,
-        NULL,
-        D3DXSHADER_DEBUG,
-        NULL,
-        &pEffect,
-        NULL
-    );
+    D3DXCreateEffectFromFile(g_pd3dDevice,
+                             _T("simple.fx"),
+                             NULL,
+                             NULL,
+                             D3DXSHADER_DEBUG,
+                             NULL,
+                             &g_pEffect,
+                             NULL );
 
     Sprite* sprCursor = new Sprite(g_pd3dDevice);
     sprCursor->Load(_T("command_cursor.png"));
@@ -312,23 +319,60 @@ static HRESULT InitD3D(HWND hWnd)
 
     bool bEnglish = false;
 
-    menu.Init(pFont, pSE, sprCursor, bEnglish, L"commandName.csv");
+    g_command.reset(new CommandLib());
+    g_command->Init(pFont, pSE, sprCursor, bEnglish, L"commandName.csv");
     
-    menu.UpsertCommand(L"cutTree", true);
-    menu.UpsertCommand(L"pickPlant", true);
-    menu.UpsertCommand(L"rest3Hours", true);
-    menu.UpsertCommand(L"lieDown", true);
-    menu.UpsertCommand(L"sit", true);
-    menu.UpsertCommand(L"escape", true);
-    menu.UpsertCommand(L"craft", true);
-    menu.UpsertCommand(L"patchTest", true);
+    g_command->UpsertCommand(L"cutTree", true);
+    g_command->UpsertCommand(L"pickPlant", true);
+    g_command->UpsertCommand(L"rest3Hours", true);
+    g_command->UpsertCommand(L"lieDown", true);
+    g_command->UpsertCommand(L"sit", true);
+    g_command->UpsertCommand(L"escape", true);
+    g_command->UpsertCommand(L"craft", true);
+    g_command->UpsertCommand(L"patchTest", true);
+
+    // あえてメモリーリークを起こすサンプル
+    //
+    //     Detected memory leaks!
+    //     Dumping objects ->
+    //     {668} normal block at 0x000001259AC24B40, 16 bytes long.
+    //     Data: < `C%           > 60 43 C2 9A 25 01 00 00 00 00 00 00 00 00 00 00
+    //
+    // 上記のようなログが出力されれば以下のように書けば、メモリーリークが起きている場所で止めることが
+    // できるのだが、何も出力されない
+    // 
+    //  _CrtSetBreakAlloc(668);
+    //
+    if (true)
+    {
+        IDirect3DTexture9* pTexture_ = NULL;
+        auto hr2 = D3DXCreateTextureFromFile(g_pd3dDevice, L"command_cursor.png", &pTexture_);
+
+        ID3DXSprite* _D3DSprite = NULL;
+        D3DXCreateSprite(g_pd3dDevice, &_D3DSprite);
+        //_D3DSprite->Release();
+
+        ID3DXFont* _pFont = NULL;
+        D3DXCreateFont(g_pd3dDevice,
+                       18,
+                       0,
+                       FW_NORMAL,
+                       1,
+                       false,
+                       DEFAULT_CHARSET,
+                       OUT_TT_ONLY_PRECIS,
+                       CLEARTYPE_NATURAL_QUALITY,
+                       FF_DONTCARE,
+                       _T("BIZ UDMincho Medium"),
+                       &_pFont);
+    }
 
     return S_OK;
 }
 
 static VOID Cleanup()
 {
-    menu.Finalize();
+    g_command->Finalize();
 }
 
 static VOID Render()
@@ -348,7 +392,7 @@ static VOID Render()
     D3DXMatrixLookAtLH(&View, &vec1, &vec2, &vec3);
     D3DXMatrixIdentity(&mat);
     mat = mat * View * Proj;
-    pEffect->SetMatrix("matWorldViewProj", &mat);
+    g_pEffect->SetMatrix("matWorldViewProj", &mat);
 
     g_pd3dDevice->Clear(0,
                         NULL,
@@ -363,22 +407,22 @@ static VOID Render()
         wcscpy_s(msg, 128, _T("Cキーでステータスを表示"));
         TextDraw(g_pFont, msg, 0, 0);
 
-        pEffect->SetTechnique("BasicTec");
+        g_pEffect->SetTechnique("BasicTec");
         UINT numPass;
-        pEffect->Begin(&numPass, 0);
-        pEffect->BeginPass(0);
+        g_pEffect->Begin(&numPass, 0);
+        g_pEffect->BeginPass(0);
         for (DWORD i = 0; i < dwNumMaterials; i++)
         {
-            pEffect->SetTexture("texture1", pTextures[i]);
-            pMesh->DrawSubset(i);
+            g_pEffect->SetTexture("texture1", g_pTextures->at(i));
+            g_pMesh->DrawSubset(i);
         }
         if (bShowMenu)
         {
-            menu.Draw();
+            g_command->Draw();
         }
-        pEffect->CommitChanges();
-        pEffect->EndPass();
-        pEffect->End();
+        g_pEffect->CommitChanges();
+        g_pEffect->EndPass();
+        g_pEffect->End();
         g_pd3dDevice->EndScene();
     }
 
@@ -407,17 +451,17 @@ static LRESULT WINAPI MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         case VK_LEFT:
         {
-            menu.Previous();
+            g_command->Previous();
             break;
         }
         case VK_RIGHT:
         {
-            menu.Next();
+            g_command->Next();
             break;
         }
         case VK_RETURN:
         {
-            menu.Into();
+            g_command->Into();
             break;
         }
         case VK_ESCAPE:
@@ -429,13 +473,13 @@ static LRESULT WINAPI MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEMOVE:
     {
         POINTS mouse_p = MAKEPOINTS(lParam);
-        menu.MouseMove(mouse_p.x, mouse_p.y);
+        g_command->MouseMove(mouse_p.x, mouse_p.y);
         break;
     }
     case WM_LBUTTONDOWN:
     {
         POINTS mouse_p = MAKEPOINTS(lParam);
-        menu.Click(mouse_p.x, mouse_p.y);
+        g_command->Click(mouse_p.x, mouse_p.y);
         break;
     }
     }
@@ -447,7 +491,8 @@ extern INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR
 
 INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ INT)
 {
-//    _CrtSetBreakAlloc(0x1c3);
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+//    _CrtSetBreakAlloc(269);
 
     WNDCLASSEX wc { };
 
@@ -507,5 +552,11 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ 
     }
 
     UnregisterClass(_T("Window1"), wc.hInstance);
+
+    g_command.reset();
+    delete g_pTextures;
+
+    _CrtDumpMemoryLeaks();
+
     return 0;
 }
