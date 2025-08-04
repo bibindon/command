@@ -459,7 +459,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ 
 
     RegisterClassEx(&wc);
 
-    RECT rect;
+    RECT rect { };
     SetRect(&rect, 0, 0, 1600, 900);
     AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
     rect.right = rect.right - rect.left;
