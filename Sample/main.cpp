@@ -390,9 +390,6 @@ LRESULT WINAPI MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         Cleanup();
         PostQuitMessage(0);
         return 0;
-    case WM_PAINT:
-        Render();
-        return 0;
     case WM_SIZE:
         InvalidateRect(hWnd, NULL, true);
         return 0;
