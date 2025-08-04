@@ -10,6 +10,7 @@
 #pragma comment( lib, "command.lib")
 
 #ifdef _DEBUG
+#define D3D_DEBUG_INFO 
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 struct LeakChecker
@@ -91,6 +92,7 @@ private:
 
     CComPtr<IDirect3DDevice9> m_pD3DDevice;
     CComPtr<ID3DXSprite> m_D3DSprite;
+//    ID3DXSprite* m_D3DSprite = NULL;
     CComPtr<IDirect3DTexture9> m_pD3DTexture;
     UINT m_width = 0;
     UINT m_height = 0;
@@ -190,7 +192,8 @@ class SoundEffect : public ISoundEffect
 CComPtr<IDirect3D9> g_pD3D;
 CComPtr<IDirect3DDevice9> g_pd3dDevice;
 CComPtr<ID3DXFont> g_pFont;
-CComPtr<ID3DXMesh> pMesh;
+//CComPtr<ID3DXMesh> pMesh;
+ID3DXMesh* pMesh = NULL;
 std::vector<CComPtr<IDirect3DTexture9>> pTextures;
 DWORD dwNumMaterials = 0;
 CComPtr<ID3DXEffect> pEffect;
@@ -444,9 +447,16 @@ extern INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR
 
 INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ INT)
 {
-    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, MsgProc, 0L, 0L,
-                      GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
-                      _T("Window1"), NULL };
+//    _CrtSetBreakAlloc(0x1c3);
+
+    WNDCLASSEX wc { };
+
+    wc.cbSize = sizeof(WNDCLASSEX);
+    wc.style = CS_CLASSDC;
+    wc.lpfnWndProc = MsgProc;
+    wc.hInstance = GetModuleHandle(NULL);
+    wc.lpszClassName = L"Sample";
+
     RegisterClassEx(&wc);
 
     RECT rect;
@@ -457,7 +467,7 @@ INT WINAPI wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ 
     rect.top = 0;
     rect.left = 0;
 
-    HWND hWnd = CreateWindow(_T("Window1"),
+    HWND hWnd = CreateWindow(wc.lpszClassName,
                              _T("Hello DirectX9 World !!"),
                              WS_OVERLAPPEDWINDOW,
                              CW_USEDEFAULT,
