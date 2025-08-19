@@ -42,3 +42,12 @@
 /x64/Release/d3dx10_43.dll
 /x64/Release/D3DCompiler_43.dll
 *.csv#
+/command/Debug_VisualStudio2019
+/Sample/Debug_VisualStudio2019
+/Debug_VisualStudio2019/simple.cso
+/Debug_VisualStudio2019/Sample.pdb
+/Debug_VisualStudio2019/Sample.exe
+/Debug_VisualStudio2019/d3dx9_43.dll
+/Debug_VisualStudio2019/d3dx11_43.dll
+/Debug_VisualStudio2019/d3dx10_43.dll
+/Debug_VisualStudio2019/D3DCompiler_43.dll

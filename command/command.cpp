@@ -96,7 +96,7 @@ void CommandLib::Draw()
     // もし、選択不可能なコマンド上にカーソルがあったら、
     // 選択可能なコマンド上にカーソルを移動させる。
 
-    if (m_commandList.size() <= m_cursorIndex ||
+    if ((int)m_commandList.size() <= m_cursorIndex ||
         !m_commandList.at(m_cursorIndex).GetEnable())
     {
         m_cursorIndex = 0;
